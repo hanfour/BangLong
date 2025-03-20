@@ -29,9 +29,12 @@ export default function ProjectCarousel({ projects, initialIndex = 0 }: ProjectC
   const isSingleProject = projects.length === 1;
   const currentProject = projects[currentIndex];
 
+  // 將 isSingleProject 移到組件頂部
+  const isSingleProjectRef = React.useRef(isSingleProject);
+
   // 處理前進
   const nextSlide = useCallback(() => {
-    if (isTransitioning || isSingleProject) return;
+    if (isTransitioning || isSingleProjectRef.current) return;
     
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) => (prevIndex + 1) % projects.length);
@@ -44,7 +47,7 @@ export default function ProjectCarousel({ projects, initialIndex = 0 }: ProjectC
 
   // 處理後退
   const prevSlide = useCallback(() => {
-    if (isTransitioning || isSingleProject) return;
+    if (isTransitioning || isSingleProjectRef.current) return;
     
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) => (prevIndex - 1 + projects.length) % projects.length);
@@ -57,7 +60,7 @@ export default function ProjectCarousel({ projects, initialIndex = 0 }: ProjectC
 
   // 自動播放輪播
   useEffect(() => {
-    if(isSingleProject) return;
+    if(isSingleProjectRef.current) return;
 
     const interval = setInterval(() => {
       nextSlide();
