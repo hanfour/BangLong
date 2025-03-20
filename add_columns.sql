@@ -1,0 +1,3 @@
+ALTER TABLE "Carousel" 
+ADD COLUMN IF NOT EXISTS "textPosition" TEXT NOT NULL DEFAULT 'center',
+ADD COLUMN IF NOT EXISTS "textDirection" TEXT NOT NULL DEFAULT 'horizontal';

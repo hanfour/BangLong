@@ -1,0 +1,23 @@
+{
+  "name": "邦瓏建設官方網站",
+  "short_name": "邦瓏建設",
+  "description": "邦瓏建設專注打造高品質建築，注重生活細節，秉持精工品質與永續理念，創造舒適理想的居住環境。",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait",
+  "lang": "zh-TW"
+}

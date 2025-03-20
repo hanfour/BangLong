@@ -1,0 +1,15 @@
+# 邦瓏建設官方網站 robots.txt
+User-agent: *
+Allow: /
+
+# 禁止爬蟲訪問管理後台頁面
+Disallow: /admin/
+Disallow: /api/
+
+# 禁止訪問特定文件類型
+Disallow: /*.json$
+Disallow: /*.xml$
+Allow: /sitemap.xml
+
+# Sitemap
+Sitemap: https://banglongconstruction.vercel.app/sitemap.xml

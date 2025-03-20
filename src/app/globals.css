@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #3e3a39;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} */
+
+body {
+  background-image: url('/bg-light.jpg');
+  background-repeat: repeat;
+  background-size: contain;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 垂直文字 */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* 輪播動畫 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+/* 自定義類名 */
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-[#a48b78] text-white rounded hover:bg-[#40220f] transition-colors duration-300;
+  }
+  
+  .btn-outline {
+    @apply px-6 py-3 border-2 border-[#a48b78] text-[#a48b78] font-medium rounded hover:bg-[#a48b78] hover:text-white transition-colors duration-300;
+  }
+  
+  .section-title {
+    @apply text-3xl lg:text-4xl font-bold mb-6 text-[#40220f];
+  }
+}
+
+@layer utilities {
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+  
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+}
