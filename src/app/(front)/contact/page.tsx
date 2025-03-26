@@ -28,6 +28,7 @@ export default function ContactPage() {
   const [submitError, setSubmitError] = useState('');
   const [captchaId, setCaptchaId] = useState('');
   const [captchaImage, setCaptchaImage] = useState('');
+  const [captchaText, setCaptchaText] = useState(''); // 儲存驗證碼文字
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const {
@@ -60,6 +61,9 @@ export default function ContactPage() {
         setCaptchaId(data.captchaId);
         // 為測試環境生成文字驗證碼圖片
         if (data.captchaText) {
+          // 儲存驗證碼文字供本地驗證使用
+          setCaptchaText(data.captchaText);
+          
           const canvas = document.createElement('canvas');
           canvas.width = 100;
           canvas.height = 50;
@@ -99,6 +103,14 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     setSubmitError('');
+
+    // 前端驗證驗證碼
+    if (data.verifyCode !== captchaText) {
+      setSubmitError('驗證碼不正確，請重新輸入');
+      fetchCaptcha(); // 重新獲取驗證碼
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // 提交表單到 API

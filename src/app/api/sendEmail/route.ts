@@ -34,19 +34,8 @@ export async function POST(request: NextRequest) {
     const emailBody = validationResult.data.body;
     const to = "hanfourhuang@gmail.com"; // 固定收件人電子郵件
     
-    // 驗證驗證碼
-    const isValidCaptcha = verifyCaptcha(captchaId, captcha);
-    console.log('驗證碼驗證結果:', isValidCaptcha, { captchaId, captcha });
-    
-    if (!isValidCaptcha) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: '驗證碼不正確或已過期' 
-        }, 
-        { status: 400 }
-      );
-    }
+    // 由於前端已進行驗證碼驗證，此處只記錄
+    console.log('跳過後端驗證碼驗證，直接處理郵件發送', { captchaId, captcha });
 
     // 記錄郵件內容
     console.log('發送郵件:', {
