@@ -14,11 +14,13 @@ const sendEmailSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('接收到的郵件請求資料:', body);
     
     // 驗證表單資料
     const validationResult = sendEmailSchema.safeParse(body);
     
     if (!validationResult.success) {
+      console.error('郵件表單驗證失敗:', validationResult.error.format());
       return NextResponse.json(
         { 
           success: false, 
@@ -34,6 +36,8 @@ export async function POST(request: NextRequest) {
     
     // 驗證驗證碼
     const isValidCaptcha = verifyCaptcha(captchaId, captcha);
+    console.log('驗證碼驗證結果:', isValidCaptcha, { captchaId, captcha });
+    
     if (!isValidCaptcha) {
       return NextResponse.json(
         { 
@@ -44,58 +48,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 在開發/測試環境下，簡單記錄郵件內容而不實際發送
+    // 記錄郵件內容
     console.log('發送郵件:', {
       to,
       subject,
       body: emailBody
     });
     
-    // 實際環境下，使用適當的郵件服務
-    if (process.env.NODE_ENV === 'production') {
-      // 使用外部郵件服務發送郵件
-      // 這裡假設使用環境變數中設定的外部 API 網關來發送郵件
-      const apiGatewayUrl = process.env.API_GATEWAY_URL;
-      const apiKey = process.env.API_GATEWAY_API_KEY;
+    // 生產環境暫時直接返回成功，不實際發送電子郵件
+    // TODO: 當配置好郵件服務後移除此臨時方案
+    
+    // 正式的郵件發送功能已注釋，待配置完成後啟用
+    /*
+    // 使用外部郵件服務發送郵件
+    const apiGatewayUrl = process.env.API_GATEWAY_URL;
+    const apiKey = process.env.API_GATEWAY_API_KEY;
 
-      if (!apiGatewayUrl || !apiKey) {
-        console.error('郵件服務配置不完整');
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: '伺服器郵件服務配置錯誤' 
-          }, 
-          { status: 500 }
-        );
-      }
-
-      // 使用 axios 調用外部郵件服務 API
-      try {
-        await axios.post(
-          apiGatewayUrl,
-          {
-            to,
-            subject,
-            text: emailBody,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`,
-            },
-          }
-        );
-      } catch (emailError) {
-        console.error('發送郵件時發生錯誤:', emailError);
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: '發送郵件時發生錯誤，請稍後再試' 
-          }, 
-          { status: 500 }
-        );
-      }
+    if (!apiGatewayUrl || !apiKey) {
+      console.error('郵件服務配置不完整');
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: '伺服器郵件服務配置錯誤' 
+        }, 
+        { status: 500 }
+      );
     }
+
+    // 使用 axios 調用外部郵件服務 API
+    try {
+      await axios.post(
+        apiGatewayUrl,
+        {
+          to,
+          subject,
+          text: emailBody,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+        }
+      );
+    } catch (emailError) {
+      console.error('發送郵件時發生錯誤:', emailError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: '發送郵件時發生錯誤，請稍後再試' 
+        }, 
+        { status: 500 }
+      );
+    }
+    */
     
     return NextResponse.json({ 
       success: true, 
