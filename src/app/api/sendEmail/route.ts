@@ -44,49 +44,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 使用外部郵件服務發送郵件
-    // 這裡假設使用環境變數中設定的外部 API 網關來發送郵件
-    const apiGatewayUrl = process.env.API_GATEWAY_URL;
-    const apiKey = process.env.API_GATEWAY_API_KEY;
+    // 在開發/測試環境下，簡單記錄郵件內容而不實際發送
+    console.log('發送郵件:', {
+      to,
+      subject,
+      body: emailBody
+    });
+    
+    // 實際環境下，使用適當的郵件服務
+    if (process.env.NODE_ENV === 'production') {
+      // 使用外部郵件服務發送郵件
+      // 這裡假設使用環境變數中設定的外部 API 網關來發送郵件
+      const apiGatewayUrl = process.env.API_GATEWAY_URL;
+      const apiKey = process.env.API_GATEWAY_API_KEY;
 
-    if (!apiGatewayUrl || !apiKey) {
-      console.error('郵件服務配置不完整');
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: '伺服器郵件服務配置錯誤' 
-        }, 
-        { status: 500 }
-      );
-    }
+      if (!apiGatewayUrl || !apiKey) {
+        console.error('郵件服務配置不完整');
+        return NextResponse.json(
+          { 
+            success: false, 
+            message: '伺服器郵件服務配置錯誤' 
+          }, 
+          { status: 500 }
+        );
+      }
 
-    // 使用 axios 調用外部郵件服務 API
-    // 注意：實際的外部 API 可能有不同的參數規格，請根據實際情況調整
-    try {
-      await axios.post(
-        apiGatewayUrl,
-        {
-          to,
-          subject,
-          text: emailBody,
-          // 可能需要其他參數，如 from 等
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
+      // 使用 axios 調用外部郵件服務 API
+      try {
+        await axios.post(
+          apiGatewayUrl,
+          {
+            to,
+            subject,
+            text: emailBody,
           },
-        }
-      );
-    } catch (emailError) {
-      console.error('發送郵件時發生錯誤:', emailError);
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: '發送郵件時發生錯誤，請稍後再試' 
-        }, 
-        { status: 500 }
-      );
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+            },
+          }
+        );
+      } catch (emailError) {
+        console.error('發送郵件時發生錯誤:', emailError);
+        return NextResponse.json(
+          { 
+            success: false, 
+            message: '發送郵件時發生錯誤，請稍後再試' 
+          }, 
+          { status: 500 }
+        );
+      }
     }
     
     return NextResponse.json({ 
