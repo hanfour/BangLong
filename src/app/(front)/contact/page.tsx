@@ -58,7 +58,31 @@ export default function ContactPage() {
       const data = await response.json();
       if (data.success) {
         setCaptchaId(data.captchaId);
-        setCaptchaImage(data.captchaImage);
+        // 為測試環境生成文字驗證碼圖片
+        if (data.captchaText) {
+          const canvas = document.createElement('canvas');
+          canvas.width = 100;
+          canvas.height = 50;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // 設置背景
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 添加數字
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i < data.captchaText.length; i++) {
+              ctx.fillText(data.captchaText[i], 20 + i * 20, 25);
+            }
+            
+            setCaptchaImage(canvas.toDataURL('image/png'));
+          }
+        } else if (data.captchaImage) {
+          setCaptchaImage(data.captchaImage);
+        }
       } else {
         console.error('獲取驗證碼失敗:', data.message);
       }
