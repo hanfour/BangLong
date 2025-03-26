@@ -62,6 +62,21 @@ export async function POST(request: NextRequest) {
       
       console.log('調用 AWS API Gateway:', apiGatewayUrl);
       
+      // 輸出請求格式
+      console.log('發送請求到 API Gateway, 請求內容:', {
+        url: apiGatewayUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'x-api-key': apiKey,
+        },
+        body: {
+          to,
+          subject,
+          text: emailBody,
+        }
+      });
+      
       // 使用 axios 調用 AWS API Gateway
       const response = await axios.post(
         apiGatewayUrl,
@@ -69,6 +84,11 @@ export async function POST(request: NextRequest) {
           to,
           subject,
           text: emailBody,
+          // 嘗試使用其他可能的參數命名
+          message: emailBody,
+          body: emailBody,
+          content: emailBody,
+          email: to
         },
         {
           headers: {
@@ -86,11 +106,33 @@ export async function POST(request: NextRequest) {
         throw new Error(`API Gateway 回應狀態: ${response.status}`);
       }
     } catch (emailError) {
+      // 輸出詳細錯誤信息
       console.error('發送郵件時發生錯誤:', emailError);
+      
+      // 如果是 axios 錯誤，則提取更多信息
+      let errorDetails = '';
+      if (axios.isAxiosError(emailError) && emailError.response) {
+        console.error('API 響應詳情:', {
+          status: emailError.response.status,
+          statusText: emailError.response.statusText,
+          data: emailError.response.data,
+          headers: emailError.response.headers
+        });
+        errorDetails = JSON.stringify({
+          status: emailError.response.status,
+          data: emailError.response.data
+        });
+      }
+      
+      // 在開發環境中透過前端回傳詳細錯誤訊息
+      const errorMessage = process.env.NODE_ENV === 'production' 
+        ? '發送郵件時發生錯誤，請稍後再試'
+        : `發送郵件時發生錯誤: ${emailError instanceof Error ? emailError.message : String(emailError)} ${errorDetails}`;
+      
       return NextResponse.json(
         { 
           success: false, 
-          message: '發送郵件時發生錯誤，請稍後再試',
+          message: errorMessage,
           error: emailError instanceof Error ? emailError.message : String(emailError)
         }, 
         { status: 500 }
