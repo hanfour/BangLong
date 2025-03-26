@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { subject, body, captcha, captchaId } = validationResult.data;
+    const { subject, captcha, captchaId } = validationResult.data;
+    const emailBody = validationResult.data.body;
     const to = "hanfourhuang@gmail.com"; // 固定收件人電子郵件
     
     // 驗證驗證碼
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
         {
           to,
           subject,
-          text: body,
+          text: emailBody,
           // 可能需要其他參數，如 from 等
         },
         {
