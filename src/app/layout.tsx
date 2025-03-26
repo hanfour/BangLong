@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   generator: 'Next.js',
   applicationName: '邦瓏建設官方網站',
   keywords: ['邦瓏建設', '建設公司', '豪宅建築', '精品建築', '永續建築', '台灣建設', '高品質住宅'],
-  authors: [{ name: '邦瓏建設', url: 'https://banglongconstruction.vercel.app' }],
+  authors: [{ name: '邦瓏建設', url: 'https://www.banglong.tw' }],
   creator: '邦瓏建設',
   publisher: '邦瓏建設',
   formatDetection: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://banglongconstruction.vercel.app'),
+  metadataBase: new URL('https://www.banglong.tw'),
   alternates: {
     canonical: '/',
   },
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'zh_TW',
-    url: 'https://banglongconstruction.vercel.app',
+    url: 'https://www.banglong.tw',
     title: '邦瓏建設 - 精築生活，永續建築',
     description: '邦瓏建設專注打造高品質建築，注重生活細節，秉持精工品質與永續理念，創造舒適理想的居住環境。',
     siteName: '邦瓏建設',

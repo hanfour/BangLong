@@ -12,4 +12,4 @@ Disallow: /*.xml$
 Allow: /sitemap.xml
 
 # Sitemap
-Sitemap: https://banglongconstruction.vercel.app/sitemap.xml
+Sitemap: https://www.banglong.tw/sitemap.xml

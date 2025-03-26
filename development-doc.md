@@ -296,7 +296,7 @@ npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
 - **部署平台**: Vercel
 - **專案名稱**: banglongconstruction
-- **專案連結**: https://banglongconstruction.vercel.app
+- **專案連結**: https://www.banglong.tw
 - **測試環境**: https://banglongconstruction-staging.vercel.app
 
 ## 管理員帳戶

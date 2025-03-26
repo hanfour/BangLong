@@ -43,7 +43,9 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    // 這裡可以加入發送通知電子郵件的功能
+    // 表單提交成功訊息
+    // 注意：我們不在這裡發送電子郵件，而是在前端調用 /api/sendEmail API
+    // 這樣可以避免因郵件發送失敗而影響表單提交功能
     
     return NextResponse.json({ 
       success: true, 

@@ -26,7 +26,8 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [verifyCode, setVerifyCode] = useState('');
+  const [captchaId, setCaptchaId] = useState('');
+  const [captchaImage, setCaptchaImage] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const {
@@ -46,105 +47,38 @@ export default function ContactPage() {
     },
   });
 
-  // 生成驗證碼
-  const generateVerifyCode = () => {
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setVerifyCode(code);
-    
-    // 繪製驗證碼到 canvas
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // 設置背景
-        ctx.fillStyle = '#f5f5f5';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 添加背景噪點
-        for (let i = 0; i < 100; i++) {
-          ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.1})`;
-          ctx.fillRect(
-            Math.random() * canvas.width,
-            Math.random() * canvas.height,
-            1,
-            1
-          );
-        }
-        
-        // 設置文字
-        ctx.textBaseline = 'middle';
-        
-        // 隨機放置字元並旋轉
-        for (let i = 0; i < code.length; i++) {
-          const fontSize = 20 + Math.random() * 10;
-          ctx.font = `bold ${fontSize}px Arial`;
-          
-          // 生成較深的隨機顏色，確保可讀性
-          const r = Math.floor(Math.random() * 100);
-          const g = Math.floor(Math.random() * 100);
-          const b = Math.floor(Math.random() * 100 + 155);  // 確保藍色元素較高
-          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          
-          // 輕微旋轉
-          ctx.save();
-          const x = 15 + i * 22;
-          const y = canvas.height / 2 + (Math.random() - 0.5) * 10;
-          ctx.translate(x, y);
-          ctx.rotate((Math.random() - 0.5) * 0.4);
-          ctx.fillText(code[i], 0, 0);
-          ctx.restore();
-        }
-        
-        // 添加干擾線
-        for (let i = 0; i < 4; i++) {
-          ctx.beginPath();
-          ctx.lineWidth = 1 + Math.random() * 2;
-          ctx.strokeStyle = `rgba(${Math.floor(Math.random() * 150)}, ${Math.floor(
-            Math.random() * 150
-          )}, ${Math.floor(Math.random() * 150 + 100)}, 0.5)`;
-          
-          // 繪製曲線而非直線
-          ctx.moveTo(Math.random() * 30, Math.random() * canvas.height);
-          
-          // 控制點
-          const cp1x = canvas.width / 3 + Math.random() * 30;
-          const cp1y = Math.random() * canvas.height;
-          const cp2x = (canvas.width * 2) / 3 + Math.random() * 30;
-          const cp2y = Math.random() * canvas.height;
-          
-          // 終點
-          const endX = canvas.width - Math.random() * 30;
-          const endY = Math.random() * canvas.height;
-          
-          // 繪製貝茲曲線
-          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-          ctx.stroke();
-        }
+  // 獲取服務器生成的驗證碼
+  const fetchCaptcha = async () => {
+    try {
+      const response = await fetch('/api/captcha');
+      if (!response.ok) {
+        throw new Error('獲取驗證碼失敗');
       }
+      
+      const data = await response.json();
+      if (data.success) {
+        setCaptchaId(data.captchaId);
+        setCaptchaImage(data.captchaImage);
+      } else {
+        console.error('獲取驗證碼失敗:', data.message);
+      }
+    } catch (error) {
+      console.error('獲取驗證碼出錯:', error);
     }
   };
 
-  // 頁面加載時生成驗證碼
+  // 頁面加載時獲取驗證碼
   useEffect(() => {
-    generateVerifyCode();
+    fetchCaptcha();
   }, []);
 
   const onSubmit = async (data: ContactFormData) => {
-    // 檢查驗證碼是否正確
-    if (data.verifyCode !== verifyCode) {
-      setSubmitError('驗證碼不正確，請重新輸入');
-      generateVerifyCode();
-      return;
-    }
-
     setIsSubmitting(true);
     setSubmitError('');
 
     try {
       // 提交表單到 API
-      const response = await fetch('/api/contacts', {
+      const contactResponse = await fetch('/api/contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,27 +92,49 @@ export default function ContactPage() {
         }),
       });
 
-      const result = await response.json();
+      const contactResult = await contactResponse.json();
 
-      if (!response.ok) {
-        if (result.errors) {
+      if (!contactResponse.ok) {
+        if (contactResult.errors) {
           // 處理特定驗證錯誤
-          const firstError = Object.values(result.errors)[0];
+          const firstError = Object.values(contactResult.errors)[0];
           if (Array.isArray(firstError) && firstError.length > 0 && typeof firstError[0] === 'object' && firstError[0].message) {
             setSubmitError(firstError[0].message);
           } else {
             setSubmitError('表單資料有誤，請檢查並重新提交');
           }
         } else {
-          setSubmitError(result.message || '表單提交失敗，請稍後再試');
+          setSubmitError(contactResult.message || '表單提交失敗，請稍後再試');
         }
+        fetchCaptcha(); // 重新獲取驗證碼
         return;
+      }
+      
+      // 發送通知電子郵件
+      const emailResponse = await fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: '邦瓏建設網站 - 新聯絡表單提交',
+          body: `姓名: ${data.name}\n電子郵件: ${data.email}\n電話: ${data.phone}\n\n訊息內容:\n${data.message}`,
+          captcha: data.verifyCode,
+          captchaId: captchaId,
+        }),
+      });
+      
+      const emailResult = await emailResponse.json();
+      
+      if (!emailResponse.ok) {
+        console.error('發送通知郵件失敗:', emailResult.message);
+        // 即使郵件發送失敗，我們也不向用戶顯示錯誤，因為聯絡表單已成功提交到資料庫
       }
       
       // 成功提交
       setSubmitSuccess(true);
       reset();
-      generateVerifyCode();
+      fetchCaptcha(); // 重新獲取驗證碼
       
       // 5秒後重置成功訊息
       setTimeout(() => {
@@ -187,6 +143,7 @@ export default function ContactPage() {
     } catch (error) {
       console.error('表單提交失敗', error);
       setSubmitError('表單提交失敗，請稍後再試');
+      fetchCaptcha(); // 重新獲取驗證碼
     } finally {
       setIsSubmitting(false);
     }
@@ -307,17 +264,25 @@ export default function ContactPage() {
                     maxLength={4}
                   />
                   <div className="flex-shrink-0 flex space-x-2">
-                    <canvas
-                      ref={canvasRef}
-                      width="100"
-                      height="50"
-                      className="cursor-pointer w-full sm:w-auto max-w-[100px]"
-                      onClick={generateVerifyCode}
-                      title="點擊重新生成驗證碼"
-                    />
+                    {captchaImage ? (
+                      <img
+                        src={captchaImage}
+                        alt="驗證碼"
+                        className="cursor-pointer w-full sm:w-auto max-w-[100px]"
+                        onClick={fetchCaptcha}
+                        title="點擊重新生成驗證碼"
+                      />
+                    ) : (
+                      <div 
+                        className="cursor-pointer w-full sm:w-auto max-w-[100px] h-[50px] bg-gray-200 flex items-center justify-center"
+                        onClick={fetchCaptcha}
+                      >
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      </div>
+                    )}
                     <button
                       type="button"
-                      onClick={generateVerifyCode}
+                      onClick={fetchCaptcha}
                       className="mt-1 text-sm text-[#a48b78] group-hover:text-[#40220f] w-full text-center cursor-pointer"
                     >
                       <RefreshCw className="h-5 w-5 mr-2"/>
