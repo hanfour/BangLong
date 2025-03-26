@@ -40,7 +40,8 @@
   ## Implementation Details
 
   ### Environment Variables
-  - **SENDGRID_API_KEY**: SendGrid API key for email sending
+  - **API_GATEWAY_URL**: URL for the AWS API Gateway endpoint
+  - **API_GATEWAY_API_KEY**: API key for AWS API Gateway authentication
 
   ### Error Handling
 

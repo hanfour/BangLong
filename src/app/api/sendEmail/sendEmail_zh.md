@@ -41,7 +41,8 @@ sendEmail API 為網站的聯絡表單提供電子郵件發送功能。它包含
 ## 實作細節
 
 ### 環境變數
-- **SENDGRID_API_KEY**: SendGrid API 金鑰
+- **API_GATEWAY_URL**: AWS API Gateway 端點 URL
+- **API_GATEWAY_API_KEY**: AWS API Gateway 認證金鑰
 
 ### 錯誤處理
 
@@ -85,5 +86,5 @@ const sendEmail = async (formData) => {
 
 ## 相依性
 
-- fetch API: 用於向 SendGrid API 發送請求
+- axios: 用於向 AWS API Gateway 發送請求
 - uuid: 用於生成唯一的驗證碼 ID

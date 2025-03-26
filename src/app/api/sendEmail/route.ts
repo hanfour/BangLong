@@ -55,43 +55,54 @@ export async function POST(request: NextRequest) {
       body: emailBody
     });
     
-    // 使用 SendGrid 發送郵件
+    // 使用 AWS API Gateway 發送郵件
     try {
-      // 使用 fetch 代替 axios (減少依賴)
-      const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        },
-        body: JSON.stringify({
-          personalizations: [
-            {
-              to: [{ email: to }],
-              subject: subject,
-            },
-          ],
-          from: { email: 'noreply@banglongconstruction.com', name: '邦瓏建設' },
-          content: [
-            {
-              type: 'text/plain',
-              value: emailBody,
-            },
-          ],
-        }),
-      });
+      const apiGatewayUrl = process.env.API_GATEWAY_URL;
+      const apiKey = process.env.API_GATEWAY_API_KEY;
       
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('SendGrid API 錯誤:', errorData);
-        throw new Error(`SendGrid API 回應狀態: ${response.status}`);
+      if (!apiGatewayUrl || !apiKey) {
+        console.error('郵件服務配置不完整:', { apiGatewayUrl: !!apiGatewayUrl, apiKey: !!apiKey });
+        return NextResponse.json(
+          { 
+            success: false, 
+            message: '伺服器郵件服務配置錯誤' 
+          }, 
+          { status: 500 }
+        );
+      }
+      
+      console.log('調用 AWS API Gateway:', apiGatewayUrl);
+      
+      // 使用 axios 調用 AWS API Gateway
+      const response = await axios.post(
+        apiGatewayUrl,
+        {
+          to,
+          subject,
+          text: emailBody,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'x-api-key': apiKey,
+          },
+        }
+      );
+      
+      console.log('AWS API Gateway 回應:', response.status, response.statusText);
+      
+      if (response.status < 200 || response.status >= 300) {
+        console.error('AWS API Gateway 錯誤:', response.data);
+        throw new Error(`API Gateway 回應狀態: ${response.status}`);
       }
     } catch (emailError) {
       console.error('發送郵件時發生錯誤:', emailError);
       return NextResponse.json(
         { 
           success: false, 
-          message: '發送郵件時發生錯誤，請稍後再試' 
+          message: '發送郵件時發生錯誤，請稍後再試',
+          error: emailError instanceof Error ? emailError.message : String(emailError)
         }, 
         { status: 500 }
       );
