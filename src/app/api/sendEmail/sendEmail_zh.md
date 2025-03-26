@@ -41,8 +41,7 @@ sendEmail API 為網站的聯絡表單提供電子郵件發送功能。它包含
 ## 實作細節
 
 ### 環境變數
-- **API_GATEWAY_URL**: 外部電子郵件服務 API 的 URL
-- **API_GATEWAY_API_KEY**: 與電子郵件服務進行身份驗證的 API 金鑰
+- **SENDGRID_API_KEY**: SendGrid API 金鑰
 
 ### 錯誤處理
 
@@ -86,6 +85,5 @@ const sendEmail = async (formData) => {
 
 ## 相依性
 
-- axios: 用於向外部 API 閘道發送 HTTP 請求
-- canvas: 用於生成驗證碼圖片
+- fetch API: 用於向 SendGrid API 發送請求
 - uuid: 用於生成唯一的驗證碼 ID

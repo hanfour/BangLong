@@ -40,8 +40,7 @@
   ## Implementation Details
 
   ### Environment Variables
-  - **API_GATEWAY_URL**: URL for the external email service API
-  - **API_GATEWAY_API_KEY**: API key for authentication with the email service
+  - **SENDGRID_API_KEY**: SendGrid API key for email sending
 
   ### Error Handling
 

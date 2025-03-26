@@ -55,42 +55,37 @@ export async function POST(request: NextRequest) {
       body: emailBody
     });
     
-    // 生產環境暫時直接返回成功，不實際發送電子郵件
-    // TODO: 當配置好郵件服務後移除此臨時方案
-    
-    // 正式的郵件發送功能已注釋，待配置完成後啟用
-    /*
-    // 使用外部郵件服務發送郵件
-    const apiGatewayUrl = process.env.API_GATEWAY_URL;
-    const apiKey = process.env.API_GATEWAY_API_KEY;
-
-    if (!apiGatewayUrl || !apiKey) {
-      console.error('郵件服務配置不完整');
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: '伺服器郵件服務配置錯誤' 
-        }, 
-        { status: 500 }
-      );
-    }
-
-    // 使用 axios 調用外部郵件服務 API
+    // 使用 SendGrid 發送郵件
     try {
-      await axios.post(
-        apiGatewayUrl,
-        {
-          to,
-          subject,
-          text: emailBody,
+      // 使用 fetch 代替 axios (減少依賴)
+      const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-          },
-        }
-      );
+        body: JSON.stringify({
+          personalizations: [
+            {
+              to: [{ email: to }],
+              subject: subject,
+            },
+          ],
+          from: { email: 'noreply@banglongconstruction.com', name: '邦瓏建設' },
+          content: [
+            {
+              type: 'text/plain',
+              value: emailBody,
+            },
+          ],
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('SendGrid API 錯誤:', errorData);
+        throw new Error(`SendGrid API 回應狀態: ${response.status}`);
+      }
     } catch (emailError) {
       console.error('發送郵件時發生錯誤:', emailError);
       return NextResponse.json(
@@ -101,7 +96,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    */
     
     return NextResponse.json({ 
       success: true, 
