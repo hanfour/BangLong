@@ -3,108 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon, Bold, Italic, List, Link } from 'lucide-react';
+import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
-
-// 自定義簡易編輯器組件
-function SimpleEditor({ value, onChange }: { value: string, onChange: (value: string) => void }) {
-  const [htmlValue, setHtmlValue] = useState(value);
-  
-  // 當內部值更改時，通知父組件
-  useEffect(() => {
-    onChange(htmlValue);
-  }, [htmlValue, onChange]);
-  
-  // 簡單的格式化功能
-  const addFormat = (format: string) => {
-    const textarea = document.getElementById('simple-editor') as HTMLTextAreaElement;
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-    
-    let formattedText = '';
-    let cursorPos = start;
-    
-    switch (format) {
-      case 'bold':
-        formattedText = `<strong>${selectedText}</strong>`;
-        cursorPos = start + 8 + selectedText.length;
-        break;
-      case 'italic':
-        formattedText = `<em>${selectedText}</em>`;
-        cursorPos = start + 4 + selectedText.length;
-        break;
-      case 'list':
-        formattedText = `<ul>\n  <li>${selectedText}</li>\n</ul>`;
-        cursorPos = start + 9 + selectedText.length;
-        break;
-      case 'link':
-        formattedText = `<a href="#">${selectedText}</a>`;
-        cursorPos = start + 9 + selectedText.length;
-        break;
-      default:
-        return;
-    }
-    
-    const newValue = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-    setHtmlValue(newValue);
-    
-    // 重新設置選中區域
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(cursorPos, cursorPos);
-    }, 10);
-  };
-  
-  return (
-    <div className="simple-editor-container">
-      <div className="bg-gray-100 p-2 border border-gray-300 border-b-0 rounded-t-md flex space-x-2">
-        <button 
-          type="button" 
-          onClick={() => addFormat('bold')}
-          className="p-1 hover:bg-gray-200 rounded"
-          title="粗體"
-        >
-          <Bold size={16} />
-        </button>
-        <button 
-          type="button" 
-          onClick={() => addFormat('italic')}
-          className="p-1 hover:bg-gray-200 rounded"
-          title="斜體"
-        >
-          <Italic size={16} />
-        </button>
-        <button 
-          type="button" 
-          onClick={() => addFormat('list')}
-          className="p-1 hover:bg-gray-200 rounded"
-          title="列表"
-        >
-          <List size={16} />
-        </button>
-        <button 
-          type="button" 
-          onClick={() => addFormat('link')}
-          className="p-1 hover:bg-gray-200 rounded"
-          title="連結"
-        >
-          <Link size={16} />
-        </button>
-      </div>
-      <textarea
-        id="simple-editor"
-        value={htmlValue}
-        onChange={(e) => setHtmlValue(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-b-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-        rows={6}
-        placeholder="您有新的客戶諮詢: {{name}} ({{email}}) {{phone}} 訊息: {{message}}"
-      />
-    </div>
-  );
-}
+import TiptapEditor from '@/components/admin/TiptapEditor';
 
 import AdminLayout from '@/components/admin/AdminLayout';
 
@@ -701,9 +602,10 @@ export default function SiteSettings() {
                   通知信模板
                 </label>
                 
-                <SimpleEditor 
+                <TiptapEditor 
                   value={settings.email.notificationTemplate as string} 
                   onChange={(content) => handleInputChange('email', 'notificationTemplate', content)}
+                  placeholder="您有新的客戶諮詢: {{name}} ({{email}}) {{phone}} 訊息: {{message}}"
                 />
                 
                 <div className="mt-4 p-4 bg-gray-50 rounded-md">

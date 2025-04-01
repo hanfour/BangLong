@@ -99,3 +99,39 @@ body {
 .prose img {
   margin: 0 auto;
 }
+
+/* TiptapEditor 樣式 */
+.tiptap-editor-container {
+  margin-bottom: 1rem;
+}
+
+.ProseMirror {
+  outline: none;
+  min-height: 120px;
+  padding: 0.5rem;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 文字對齊樣式 */
+.ProseMirror .text-left {
+  text-align: left;
+}
+
+.ProseMirror .text-center {
+  text-align: center;
+}
+
+.ProseMirror .text-right {
+  text-align: right;
+}
+
+.ProseMirror .text-justify {
+  text-align: justify;
+}
