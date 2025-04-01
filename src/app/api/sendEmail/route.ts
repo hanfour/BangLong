@@ -133,25 +133,18 @@ export async function POST(request: NextRequest) {
         body: {
           to,
           subject,
-          text: emailBody,
+          body: emailBody.substring(0, 100) + '...' // 只記錄部分內容
         }
       });
       
       // 使用 axios 調用 AWS API Gateway
+      // 參數格式與 AWS Lambda 函數需求匹配
       const response = await axios.post(
         apiGatewayUrl,
         {
-          to,
-          subject,
-          text: emailBody, // 純文本版本
-          html: emailBody, // HTML 版本
-          // 嘗試使用其他可能的參數命名
-          message: emailBody,
-          body: emailBody,
-          content: emailBody,
-          email: to,
-          htmlBody: emailBody, // 額外的 HTML 參數
-          htmlContent: emailBody // 額外的 HTML 參數
+          to, // 收件人
+          subject, // 郵件主題
+          body: emailBody, // HTML 郵件內容
         },
         {
           headers: {

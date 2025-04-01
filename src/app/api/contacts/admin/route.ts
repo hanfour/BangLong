@@ -184,7 +184,7 @@ export async function PATCH(request: NextRequest) {
                 <tr>
                   <td style="padding: 15px;">
                     <p style="margin: 0 0 10px 0; font-weight: bold;">我們的回覆：</p>
-                    <div style="margin: 0;">${reply}</div>
+                    <div style="margin: 0;">${reply.replace(/\n/g, '<br>')}</div>
                   </td>
                 </tr>
               </table>
