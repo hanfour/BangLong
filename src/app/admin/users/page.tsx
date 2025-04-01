@@ -426,7 +426,7 @@ export default function UsersPage() {
 
       {/* 添加用戶模態框 */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/25 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="text-lg font-medium text-gray-900">添加新用戶</h3>
@@ -443,7 +443,7 @@ export default function UsersPage() {
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                     姓名
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <UserIcon className="h-5 w-5 text-gray-400" />
                     </div>
@@ -452,7 +452,7 @@ export default function UsersPage() {
                       id="name"
                       value={newUser.name}
                       onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="用戶姓名"
                       required
                     />
@@ -462,7 +462,7 @@ export default function UsersPage() {
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                     電子郵件
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
@@ -471,7 +471,7 @@ export default function UsersPage() {
                       id="email"
                       value={newUser.email}
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
                       required
                     />
@@ -481,7 +481,7 @@ export default function UsersPage() {
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                     密碼
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Key className="h-5 w-5 text-gray-400" />
                     </div>
@@ -490,7 +490,7 @@ export default function UsersPage() {
                       id="password"
                       value={newUser.password}
                       onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="至少6個字元"
                       minLength={6}
                       required
@@ -505,13 +505,13 @@ export default function UsersPage() {
                     id="role"
                     value={newUser.role}
                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'admin' | 'editor' })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                    className="mt-1 py-4 pl-4 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                   >
                     <option value="editor">編輯者</option>
                     <option value="admin">管理員</option>
                   </select>
-                  <p className="mt-1 text-sm text-gray-500">
-                    管理員可以管理所有功能，包括用戶管理。編輯者只能管理內容。
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    *管理員可以管理所有功能，包括用戶管理。<br/>*編輯者只能管理內容。
                   </p>
                 </div>
               </div>
@@ -535,7 +535,7 @@ export default function UsersPage() {
                     </>
                   ) : (
                     <>
-                      <UserPlus className="h-4 w-4 mr-2" />
+                      <UserPlus className="h-4 w-4 mr-2 cursor-pointer" />
                       創建用戶
                     </>
                   )}
@@ -565,7 +565,7 @@ export default function UsersPage() {
                   <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">
                     姓名
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <UserIcon className="h-5 w-5 text-gray-400" />
                     </div>
@@ -574,7 +574,7 @@ export default function UsersPage() {
                       id="edit-name"
                       value={editUser.name}
                       onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="用戶姓名"
                       required
                     />
@@ -584,7 +584,7 @@ export default function UsersPage() {
                   <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700">
                     電子郵件
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
@@ -593,7 +593,7 @@ export default function UsersPage() {
                       id="edit-email"
                       value={editUser.email}
                       onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
                       required
                     />
@@ -603,7 +603,7 @@ export default function UsersPage() {
                   <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700">
                     新密碼 (留空表示不變更)
                   </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="mt-1 relative rounded-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Key className="h-5 w-5 text-gray-400" />
                     </div>
@@ -612,7 +612,7 @@ export default function UsersPage() {
                       id="edit-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                       placeholder="留空表示不變更密碼"
                       minLength={6}
                     />
@@ -626,7 +626,7 @@ export default function UsersPage() {
                     id="edit-role"
                     value={editUser.role}
                     onChange={(e) => setEditUser({ ...editUser, role: e.target.value as 'admin' | 'editor' })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                   >
                     <option value="editor">編輯者</option>
                     <option value="admin">管理員</option>
