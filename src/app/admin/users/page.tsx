@@ -380,29 +380,40 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            setEditUser(user);
-                            setPassword('');
-                            setShowEditModal(true);
-                          }}
-                          className="text-amber-600 hover:text-amber-900"
-                          disabled={user.id === session?.user?.id}
-                          title={user.id === session?.user?.id ? "無法編輯當前登錄用戶" : "編輯用戶"}
-                        >
-                          <Edit className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeleteUserId(user.id);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                          disabled={user.id === session?.user?.id}
-                          title={user.id === session?.user?.id ? "無法刪除當前登錄用戶" : "刪除用戶"}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+                        {user.id === session?.user?.id ? (
+                          <>
+                            <span className="text-gray-400 cursor-not-allowed" title="無法編輯當前登錄用戶">
+                              <Edit className="h-5 w-5" />
+                            </span>
+                            <span className="text-gray-400 cursor-not-allowed" title="無法刪除當前登錄用戶">
+                              <Trash2 className="h-5 w-5" />
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setEditUser(user);
+                                setPassword('');
+                                setShowEditModal(true);
+                              }}
+                              className="text-amber-600 hover:text-amber-900"
+                              title="編輯用戶"
+                            >
+                              <Edit className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeleteUserId(user.id);
+                                setShowDeleteModal(true);
+                              }}
+                              className="text-red-600 hover:text-red-900"
+                              title="刪除用戶"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

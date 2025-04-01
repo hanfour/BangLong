@@ -66,12 +66,24 @@ export async function GET(request: NextRequest) {
     // 獲取總數
     const total = await prisma.contactSubmission.count({ where });
     
-    // 獲取每個狀態的數量統計
-    const statusStats = await prisma.$queryRaw`
-      SELECT status, COUNT(*) as count 
-      FROM "ContactSubmission" 
-      GROUP BY status
-    `;
+    // 獲取每個狀態的數量統計 (改用 Prisma Aggregations 避免 Raw Query)
+    const newCount = await prisma.contactSubmission.count({ 
+      where: { status: 'new' } 
+    });
+    
+    const processingCount = await prisma.contactSubmission.count({ 
+      where: { status: 'processing' } 
+    });
+    
+    const completedCount = await prisma.contactSubmission.count({ 
+      where: { status: 'completed' } 
+    });
+    
+    const statusStats = [
+      { status: 'new', count: newCount },
+      { status: 'processing', count: processingCount },
+      { status: 'completed', count: completedCount }
+    ];
 
     return NextResponse.json({
       data: contactSubmissions,
