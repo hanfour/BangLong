@@ -14,7 +14,7 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, AlignLeft, 
   AlignCenter, AlignRight, AlignJustify, Link as LinkIcon, 
   Image as ImageIcon, List, ListOrdered, RemoveFormatting, 
-  Heading1, Heading2, Paperclip, Type, Palette
+  Heading1, Heading2, Paperclip, Type, Palette, Undo, Redo
 } from 'lucide-react';
 
 type TiptapEditorProps = {
@@ -27,19 +27,23 @@ const MenuButton = ({
   onClick, 
   title, 
   isActive = false,
+  disabled = false,
   children 
 }: { 
   onClick: () => void, 
   title: string, 
   isActive?: boolean,
+  disabled?: boolean,
   children: React.ReactNode 
 }) => (
   <button
     type="button"
     onClick={onClick}
     title={title}
+    disabled={disabled}
     className={`p-1 rounded transition-colors ${
-      isActive ? 'bg-amber-100 text-amber-700' : 'hover:bg-gray-200'
+      isActive ? 'bg-amber-100 text-amber-700' : 
+      disabled ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-gray-200'
     }`}
   >
     {children}
@@ -172,7 +176,7 @@ export default function TiptapEditor({ value = '', onChange, placeholder }: Tipt
   if (!editor) return null;
 
   return (
-    <div className="tiptap-editor-container border border-gray-300 rounded-md overflow-hidden">
+    <div className="tiptap-editor-container border border-gray-300 rounded-md">
       <div className="bg-gray-100 p-2 flex flex-wrap items-center gap-1 border-b border-gray-300">
         {/* Text Formatting */}
         <MenuButton 
@@ -392,7 +396,7 @@ export default function TiptapEditor({ value = '', onChange, placeholder }: Tipt
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="輸入圖片 URL"
-                    className="px-2 py-1 border border-gray-300 rounded-md flex-1"
+                    className="px-2 py-1 border border-gray-300 rounded-md flex-1 min-w-[100px]"
                   />
                   <button
                     type="button"
@@ -465,6 +469,24 @@ export default function TiptapEditor({ value = '', onChange, placeholder }: Tipt
             </div>
           )}
         </div>
+
+        <div className="mx-1 w-px h-6 bg-gray-300"></div>
+        
+        <MenuButton 
+          onClick={() => editor.chain().focus().undo().run()}
+          title="復原"
+          disabled={!editor.can().undo()}
+        >
+          <Undo size={16} />
+        </MenuButton>
+        
+        <MenuButton 
+          onClick={() => editor.chain().focus().redo().run()}
+          title="重做"
+          disabled={!editor.can().redo()}
+        >
+          <Redo size={16} />
+        </MenuButton>
         
         <div className="mx-1 w-px h-6 bg-gray-300"></div>
         
