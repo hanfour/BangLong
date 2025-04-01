@@ -91,8 +91,7 @@ body {
   }
 }
 
-/* Quill editor styles */
-@import 'react-quill/dist/quill.snow.css';
+/* Quill editor styles will be loaded dynamically in the component */
 
 /* 自定義 Quill 編輯器樣式 */
 .quill > .ql-container > .ql-editor.ql-blank::before {

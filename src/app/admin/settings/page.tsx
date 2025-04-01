@@ -6,9 +6,32 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
 
 // 動態導入 React-Quill 以避免 SSR 問題
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+// 添加錯誤處理，防止兼容性問題
+const ReactQuill = dynamic(
+  async () => {
+    try {
+      const { default: RQ } = await import('react-quill');
+      return RQ;
+    } catch (err) {
+      console.error('Error loading ReactQuill:', err);
+      // 返回一個備用的簡單文本區域組件
+      return function FallbackEditor({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+        return (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            rows={5}
+          />
+        );
+      };
+    }
+  },
+  { ssr: false }
+);
 import AdminLayout from '@/components/admin/AdminLayout';
 
 type SettingGroup = {
