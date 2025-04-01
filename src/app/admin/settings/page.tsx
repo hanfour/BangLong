@@ -42,6 +42,12 @@ export default function SiteSettings() {
     email: {
       receivers: '',
       notificationTemplate: '',
+    },
+    advanced: {
+      googleAnalytics: '',
+      headScripts: '',
+      bodyStartScripts: '',
+      bodyEndScripts: ''
     }
   });
 
@@ -86,6 +92,12 @@ export default function SiteSettings() {
         email: {
           receivers: '',
           notificationTemplate: '您有新的客戶諮詢: {{name}} ({{email}}) {{phone}} 訊息: {{message}}',
+        },
+        advanced: {
+          googleAnalytics: '',
+          headScripts: '',
+          bodyStartScripts: '',
+          bodyEndScripts: ''
         }
       };
       
@@ -267,6 +279,12 @@ export default function SiteSettings() {
       email: {
         receivers: '通知信收件者（多個郵箱以逗號分隔）',
         notificationTemplate: '通知郵件模板（支持 {{name}}, {{email}}, {{phone}}, {{message}} 變量）'
+      },
+      advanced: {
+        googleAnalytics: 'Google Analytics 4 測量 ID (格式如 G-XXXXXXXXXX)',
+        headScripts: '插入到網頁 <head> 標籤中的自定義腳本代碼（如第三方分析工具）',
+        bodyStartScripts: '插入到網頁 <body> 標籤開始處的自定義腳本代碼',
+        bodyEndScripts: '插入到網頁 <body> 標籤結束處的自定義腳本代碼（如聊天插件等）'
       }
     };
     
@@ -667,7 +685,81 @@ export default function SiteSettings() {
               </div>
             </div>
             
-            <p className="text-center text-gray-500 my-6">目前無可用的進階設定選項</p>
+            <div className="space-y-6">
+              {/* Google Analytics 設定 */}
+              <div>
+                <label htmlFor="ga_id" className="block text-sm font-medium text-gray-700 mb-1">
+                  Google Analytics 4 測量 ID
+                </label>
+                <input
+                  id="ga_id"
+                  type="text"
+                  value={settings.advanced?.googleAnalytics as string || ''}
+                  onChange={(e) => handleInputChange('advanced', 'googleAnalytics', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                  placeholder="G-XXXXXXXXXX"
+                />
+                <p className="mt-1 text-sm text-gray-500">輸入您的 Google Analytics 4 測量 ID，用於網站訪問數據分析</p>
+              </div>
+              
+              {/* Head 腳本 */}
+              <div>
+                <label htmlFor="head_scripts" className="block text-sm font-medium text-gray-700 mb-1">
+                  頁面頭部腳本 (Head Scripts)
+                </label>
+                <textarea
+                  id="head_scripts"
+                  value={settings.advanced?.headScripts as string || ''}
+                  onChange={(e) => handleInputChange('advanced', 'headScripts', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                  rows={5}
+                  placeholder="<!-- 放置在 <head> 標籤內的腳本 -->\n<script>\n  // 您的代碼\n</script>"
+                />
+                <p className="mt-1 text-sm text-gray-500">這些腳本會插入到網頁的 &lt;head&gt; 標籤中，適合放置分析、SEO 追蹤等不需要立即執行的腳本</p>
+              </div>
+              
+              {/* Body 開始處腳本 */}
+              <div>
+                <label htmlFor="body_start_scripts" className="block text-sm font-medium text-gray-700 mb-1">
+                  內容起始腳本 (Body Start Scripts)
+                </label>
+                <textarea
+                  id="body_start_scripts"
+                  value={settings.advanced?.bodyStartScripts as string || ''}
+                  onChange={(e) => handleInputChange('advanced', 'bodyStartScripts', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                  rows={5}
+                  placeholder="<!-- 放置在 <body> 標籤開始處的腳本 -->\n<script>\n  // 您的代碼\n</script>"
+                />
+                <p className="mt-1 text-sm text-gray-500">這些腳本會插入到網頁的 &lt;body&gt; 標籤開始處，在頁面內容加載之前執行</p>
+              </div>
+              
+              {/* Body 結束處腳本 */}
+              <div>
+                <label htmlFor="body_end_scripts" className="block text-sm font-medium text-gray-700 mb-1">
+                  頁面底部腳本 (Body End Scripts)
+                </label>
+                <textarea
+                  id="body_end_scripts"
+                  value={settings.advanced?.bodyEndScripts as string || ''}
+                  onChange={(e) => handleInputChange('advanced', 'bodyEndScripts', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                  rows={5}
+                  placeholder="<!-- 放置在 </body> 標籤之前的腳本 -->\n<script>\n  // 您的代碼\n</script>"
+                />
+                <p className="mt-1 text-sm text-gray-500">這些腳本會插入到網頁的 &lt;/body&gt; 標籤之前，適合放置客服聊天插件、彈窗等互動元素</p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-md">
+                <h3 className="text-base font-medium text-gray-800 mb-2">腳本安全提示：</h3>
+                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                  <li>只添加來自可信來源的腳本代碼</li>
+                  <li>確保腳本代碼不含惡意內容，可能會影響網站安全</li>
+                  <li>GA4 代碼可以直接輸入測量 ID，系統會自動生成正確的跟蹤代碼</li>
+                  <li>第三方腳本可能會影響網站性能，建議謹慎使用</li>
+                </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>

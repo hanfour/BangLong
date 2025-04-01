@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import CustomScripts from '@/components/front/CustomScripts';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -90,8 +91,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW" className="scroll-smooth">
+      <head>
+        {/* CustomScripts will inject Google Analytics and head scripts */}
+        <CustomScripts />
+      </head>
       <body className={inter.className}>
+        <div id="body-start-scripts-container" />
         {children}
+        <div id="body-end-scripts-container" />
       </body>
     </html>
   );
