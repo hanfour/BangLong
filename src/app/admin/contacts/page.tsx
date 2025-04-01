@@ -510,7 +510,7 @@ export default function ContactsPage() {
                       id="start-date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="pl-10 block w-full sm:text-sm border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                      className="py-4 pl-10 block w-full sm:text-sm border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                 </div>
@@ -526,7 +526,7 @@ export default function ContactsPage() {
                       id="end-date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="pl-10 block w-full sm:text-sm border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                      className="py-4 pl-10 block w-full sm:text-sm border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                 </div>
