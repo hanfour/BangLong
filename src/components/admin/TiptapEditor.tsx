@@ -125,32 +125,103 @@ export default function TiptapEditor({ value = '', onChange, placeholder }: Tipt
     setShowImageMenu(false);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // In a real implementation, upload to your server and get a URL
-    // For demo, we're just using a FileReader to create a data URL
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        handleInsertImage(reader.result);
+    try {
+      // 顯示上傳指示器或者禁用按鈕等...
+      
+      // 創建 FormData 對象
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // 生成隨機文件名
+      const fileExt = file.name.split('.').pop();
+      const randomName = `editor_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      
+      // 上傳圖片到服務器
+      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('圖片上傳失敗');
       }
-    };
-    reader.readAsDataURL(file);
+      
+      const uploadResult = await uploadResponse.json();
+      
+      if (!uploadResult.url) {
+        throw new Error('上傳成功但未獲得URL');
+      }
+      
+      // 使用服務器返回的 URL 插入圖片
+      handleInsertImage(uploadResult.url);
+      
+    } catch (error) {
+      console.error('上傳圖片失敗:', error);
+      alert('圖片上傳失敗，請重試');
+      
+      // 如果上傳失敗，回退到 Base64 方式（僅用於預覽）
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          handleInsertImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
   
-  const handleAttachmentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     
-    // In a real implementation, upload to your server and get a URL
-    const fileName = file.name;
-    editor
-      .chain()
-      .focus()
-      .insertContent(`<a href="#" class="attachment" title="${fileName}">${fileName}</a>`)
-      .run();
+    try {
+      // 創建 FormData 對象
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // 生成隨機文件名，保留原始檔名
+      const fileExt = file.name.split('.').pop();
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_'); // 安全化檔名
+      const randomName = `attachment_${Date.now()}_${safeFileName}`;
+      
+      // 上傳附件到服務器
+      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('附件上傳失敗');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      
+      if (!uploadResult.url) {
+        throw new Error('上傳成功但未獲得URL');
+      }
+      
+      // 使用服務器返回的 URL 創建連結
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<a href="${uploadResult.url}" class="attachment" target="_blank" title="${file.name}">${file.name}</a>`)
+        .run();
+      
+    } catch (error) {
+      console.error('上傳附件失敗:', error);
+      alert('附件上傳失敗，請重試');
+      
+      // 如果上傳失敗，創建一個無效連結作為佔位符
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<a href="#" class="attachment" title="${file.name} (上傳失敗)">${file.name} (上傳失敗)</a>`)
+        .run();
+    }
     
     setShowAttachmentMenu(false);
   };

@@ -143,6 +143,32 @@ export async function PATCH(request: NextRequest) {
         const replyReminder = "在此提醒您，請勿直接回覆或透過此郵件地址與我們聯繫，我們將不會收到您所留下的任何訊息。";
         const emailSubject = `[邦隆建設] 您的諮詢已回覆 - 案件編號 ${id.substring(0, 8)}`;
         
+        // 處理回覆內容中的圖片和附件，確保使用絕對 URL
+        let processedReply = reply;
+        
+        // 獲取網站域名（用於構建絕對 URL）
+        const baseUrl = process.env.NEXTAUTH_URL || 'https://www.banglongconstruction.com';
+        
+        // 將相對路徑圖片轉換為絕對路徑（如果不是以 http 開頭的圖片）
+        processedReply = processedReply.replace(
+          /<img[^>]+src="(?!http)([^"]+)"[^>]*>/g, 
+          (match, src) => {
+            // 將相對路徑轉為絕對路徑
+            const absoluteSrc = src.startsWith('/') ? `${baseUrl}${src}` : `${baseUrl}/${src}`;
+            return match.replace(src, absoluteSrc);
+          }
+        );
+        
+        // 同樣處理附件連結
+        processedReply = processedReply.replace(
+          /<a[^>]+href="(?!http)([^"]+)"[^>]*>/g,
+          (match, href) => {
+            // 將相對路徑轉為絕對路徑
+            const absoluteHref = href.startsWith('/') ? `${baseUrl}${href}` : `${baseUrl}/${href}`;
+            return match.replace(href, absoluteHref);
+          }
+        );
+        
         // 創建純HTML格式郵件，使用表格布局以獲得更好的郵件客戶端兼容性
         const emailBody = `<!DOCTYPE html>
 <html>
@@ -184,7 +210,7 @@ export async function PATCH(request: NextRequest) {
                 <tr>
                   <td style="padding: 15px;">
                     <p style="margin: 0 0 10px 0; font-weight: bold;">我們的回覆：</p>
-                    <div style="margin: 0;">${reply.replace(/\n/g, '<br>')}</div>
+                    <div style="margin: 0;">${processedReply.replace(/\n/g, '<br>')}</div>
                   </td>
                 </tr>
               </table>
