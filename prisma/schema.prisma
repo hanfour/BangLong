@@ -69,3 +69,15 @@ model ContactSubmission {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SiteSettings {
+  id             String   @id @default(cuid())
+  type           String   // 設定類型: seo, email, other
+  key            String   // 設定鍵名，如: title, description, receiveEmails
+  value          String   @db.Text // 設定值
+  description    String?  // 設定描述
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([type, key])
+}

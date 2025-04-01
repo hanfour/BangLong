@@ -11,7 +11,8 @@ import {
   Users, 
   LogOut, 
   Menu,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -38,7 +39,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
     { name: '交屋手冊', path: '/admin/documents', icon: <FileText className="w-5 h-5 mr-3" /> },
     { name: '客戶諮詢', path: '/admin/contacts', icon: <MessageCircle className="w-5 h-5 mr-3" /> },
-    { name: '帳號管理', path: '/admin/users', icon: <Users className="w-5 h-5 mr-3" /> }
+    { name: '帳號管理', path: '/admin/users', icon: <Users className="w-5 h-5 mr-3" /> },
+    { name: '網站設定', path: '/admin/settings', icon: <Settings className="w-5 h-5 mr-3" /> }
   ];
 
   const toggleMobileMenu = () => {

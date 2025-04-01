@@ -12,6 +12,7 @@ import {
   MessageCircle, 
   Users, 
   AlertCircle,
+  Settings
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
@@ -47,15 +48,24 @@ export default function Dashboard() {
     setError(null);
     
     try {
-      // 實際專案會使用以下API獲取數據
-      // 目前模擬數據以展示界面
+      // 針對輪播部分實際調用API獲取數量，其他模擬數據
+      const carouselResponse = await fetch('/api/carousel/admin', {
+        headers: {
+          'Cache-Control': 'no-cache'
+        },
+        credentials: 'include'
+      });
       
-      // 模擬API調用延遲
-      await new Promise(resolve => setTimeout(resolve, 800));
+      let carouselCount = 0;
       
-      // 模擬數據
+      if (carouselResponse.ok) {
+        const carouselData = await carouselResponse.json();
+        carouselCount = carouselData.carouselItems?.length || 0;
+      }
+      
+      // 其他模擬數據
       setStats({
-        carouselCount: 5,
+        carouselCount,
         projectCount: 12,
         projectsNew: 4,
         projectsClassic: 6,
@@ -66,15 +76,18 @@ export default function Dashboard() {
         userCount: 3
       });
       
-      // 實際專案中的API調用方式:
+      // 完整實現時應使用如下並行請求：
       // const [carouselRes, projectsRes, documentsRes, contactsRes, usersRes] = await Promise.all([
-      //   fetch('/api/carousel').then(res => res.json()),
+      //   fetch('/api/carousel/admin', {
+      //     headers: { 'Cache-Control': 'no-cache' },
+      //     credentials: 'include'
+      //   }).then(res => res.json()),
       //   fetch('/api/projects/stats').then(res => res.json()),
       //   fetch('/api/documents').then(res => res.json()),
       //   fetch('/api/contacts/stats').then(res => res.json()),
       //   fetch('/api/users').then(res => res.json())
       // ]);
-      
+      // 
       // setStats({
       //   carouselCount: carouselRes.carouselItems?.length || 0,
       //   projectCount: projectsRes.total || 0,
@@ -191,6 +204,29 @@ export default function Dashboard() {
                     className="text-indigo-600 hover:text-indigo-800 font-medium text-sm inline-flex items-center"
                   >
                     管理帳號
+                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-purple-100 mr-4">
+                    <Settings className="h-6 w-6 text-purple-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-700">網站設定</h3>
+                    <p className="text-md text-gray-500">SEO & 通知設定</p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Link 
+                    href="/admin/settings" 
+                    className="text-purple-600 hover:text-purple-800 font-medium text-sm inline-flex items-center"
+                  >
+                    管理設定
                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>

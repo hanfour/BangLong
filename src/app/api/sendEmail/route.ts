@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import axios from 'axios';
+import { prisma } from '@/lib/db';
 
 // 表單驗證架構
 const sendEmailSchema = z.object({
@@ -31,7 +32,31 @@ export async function POST(request: NextRequest) {
     
     const { subject, captcha, captchaId } = validationResult.data;
     const emailBody = validationResult.data.body;
-    const to = "hanfourhuang@gmail.com"; // 固定收件人電子郵件
+    
+    // 從設定獲取收件人列表
+    let to = "hanfourhuang@gmail.com"; // 默認收件人
+    
+    try {
+      // 嘗試從設定中獲取收件人
+      const emailSettings = await prisma.siteSettings.findUnique({
+        where: {
+          type_key: {
+            type: 'email',
+            key: 'receivers'
+          }
+        }
+      });
+      
+      if (emailSettings?.value) {
+        to = emailSettings.value; // 使用設定中的收件人
+        console.log('使用設定的收件人:', to);
+      } else {
+        console.log('未找到設定的收件人，使用默認值:', to);
+      }
+    } catch (error) {
+      console.error('獲取收件人設定時發生錯誤:', error);
+      // 使用默認收件人繼續
+    }
     
     // 由於前端已進行驗證碼驗證，此處只記錄
     console.log('跳過後端驗證碼驗證，直接處理郵件發送', { captchaId, captcha });
