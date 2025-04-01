@@ -71,24 +71,40 @@ export default function NewCarousel() {
     setError(null);
     
     try {
-      // 臨時解決方案: 使用本地圖片URL而不上傳
-      // 注意: 在正式環境中，應該使用實際的上傳功能
-      
-      // 創建本地URL (臨時解決方案)
-      const dummyImageUrl = 'https://via.placeholder.com/1920x1080';
-      
-      // 第一步：假裝上傳圖片
+      // 第一步：上传图片
       setUploadingStatus('uploading');
       
-      // 模擬上傳延遲
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 创建一个随机文件名，保留原始扩展名
+      const fileExt = selectedFile.name.split('.').pop();
+      const randomName = `carousel_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
+      // 創建表單數據
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      // 上傳圖片到 Vercel Blob Storage
+      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || '圖片上傳失敗');
+      }
+      
+      const uploadResult = await uploadResponse.json();
       setUploadingStatus('uploaded');
       
-      // 第二步：创建轮播项
+      if (!uploadResult.url) {
+        throw new Error('圖片上傳失敗，未獲得URL');
+      }
+      
+      // 第二步：創建輪播項目
       const carouselData = {
         title,
-        imageUrl: dummyImageUrl, // 使用假圖片URL
+        imageUrl: uploadResult.url,
         linkUrl: linkUrl || null,
         linkText: linkText || null,
         textPosition,
@@ -106,7 +122,8 @@ export default function NewCarousel() {
       });
       
       if (!createResponse.ok) {
-        throw new Error('建立輪播項目失敗');
+        const errorData = await createResponse.json();
+        throw new Error(errorData.error || '建立輪播項目失敗');
       }
       
       // 成功后跳转到轮播管理页面
@@ -119,68 +136,6 @@ export default function NewCarousel() {
     } finally {
       setIsSubmitting(false);
     }
-    
-    /* 原始上傳代碼（當Vercel Blob設置正確後可啟用）
-    try {
-      // 第一步：上传图片
-      setUploadingStatus('uploading');
-      
-      // 创建一个随机文件名，保留原始扩展名
-      const fileExt = selectedFile.name.split('.').pop();
-      const randomName = `carousel_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      
-      // 创建表单数据
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      
-      // 上传图片
-      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error('圖片上傳失敗');
-      }
-      
-      const uploadResult = await uploadResponse.json();
-      setUploadingStatus('uploaded');
-      
-      // 第二步：创建轮播项
-      const carouselData = {
-        title,
-        imageUrl: uploadResult.url,
-        linkUrl: linkUrl || null,
-        linkText: linkText || null,
-        textPosition,
-        textDirection
-      };
-      
-      const createResponse = await fetch('/api/carousel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(carouselData),
-      });
-      
-      if (!createResponse.ok) {
-        throw new Error('建立輪播項目失敗');
-      }
-      
-      // 成功后跳转到轮播管理页面
-      router.push('/admin/carousel');
-      router.refresh();
-    } catch (error) {
-      console.error('Error creating carousel:', error);
-      setError(error instanceof Error ? error.message : '建立輪播項目時發生錯誤');
-      setUploadingStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
-    */
   };
   
   // 加载中状态

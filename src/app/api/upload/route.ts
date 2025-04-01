@@ -25,16 +25,38 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('環境變數錯誤: 缺少 BLOB_READ_WRITE_TOKEN');
+      return NextResponse.json(
+        { error: 'Vercel Blob Storage 尚未設置，請聯絡管理員' }, 
+        { status: 500 }
+      );
+    }
+
     // 上傳到 Vercel Blob Storage
     const blob = await put(filename, file, {
       access: 'public',
     });
 
+    if (!blob || !blob.url) {
+      return NextResponse.json(
+        { error: '檔案上傳成功但未獲得有效的URL' }, 
+        { status: 500 }
+      );
+    }
+
+    console.log('檔案上傳成功:', blob.url);
     return NextResponse.json(blob);
   } catch (error) {
     console.error('檔案上傳失敗:', error);
+    
+    // 提供更詳細的錯誤信息
+    const errorMessage = error instanceof Error 
+      ? `檔案上傳失敗: ${error.message}` 
+      : '檔案上傳失敗，請確認 Vercel Blob Storage 設置正確';
+    
     return NextResponse.json(
-      { error: '檔案上傳失敗' }, 
+      { error: errorMessage }, 
       { status: 500 }
     );
   }
