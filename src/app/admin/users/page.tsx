@@ -438,7 +438,7 @@ export default function UsersPage() {
               </button>
             </div>
             <form onSubmit={handleAddUser}>
-              <div className="p-4 space-y-4">
+              <div className="px-4 py-8 space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                     姓名
