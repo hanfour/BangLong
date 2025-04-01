@@ -1,9 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info } from 'lucide-react';
+import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+// 動態導入 React-Quill 以避免 SSR 問題
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import AdminLayout from '@/components/admin/AdminLayout';
 
 type SettingGroup = {
@@ -23,6 +28,10 @@ export default function SiteSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [uploadingStatus, setUploadingStatus] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState<AllSettings>({
     seo: {
       title: '',
@@ -115,6 +124,89 @@ export default function SiteSettings() {
         [key]: value
       }
     }));
+  };
+  
+  // 图片上传预览
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (!file) {
+      return;
+    }
+    
+    // 檢查檔案類型
+    if (!file.type.startsWith('image/')) {
+      setError('請選擇圖片檔案');
+      return;
+    }
+    
+    // 檢查檔案大小 (限制為 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('圖片大小不能超過 5MB');
+      return;
+    }
+    
+    setSelectedFile(file);
+    setError(null);
+    
+    // 创建预览URL
+    const previewURL = URL.createObjectURL(file);
+    setImagePreview(previewURL);
+  };
+  
+  // 触发文件选择对话框
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+  
+  // 上传图片
+  const handleUploadImage = async () => {
+    if (!selectedFile) {
+      setError('請選擇要上傳的圖片');
+      return;
+    }
+    
+    setUploadingStatus('uploading');
+    setError(null);
+    
+    try {
+      // 创建一个随机文件名，保留原始扩展名
+      const fileExt = selectedFile.name.split('.').pop();
+      const randomName = `ogImage_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      
+      // 创建表单数据
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      // 上传图片
+      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || '圖片上傳失敗');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      setUploadingStatus('uploaded');
+      
+      if (!uploadResult.url) {
+        throw new Error('圖片上傳失敗，未獲得URL');
+      }
+      
+      // 设置OG图片URL
+      handleInputChange('seo', 'ogImage', uploadResult.url);
+      
+      setSuccess('圖片上傳成功');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setError(error instanceof Error ? error.message : '上傳圖片時發生錯誤');
+      setUploadingStatus('error');
+    }
   };
 
   const handleSaveSettings = async () => {
@@ -365,17 +457,84 @@ export default function SiteSettings() {
             <div className="space-y-6">
               <div>
                 <label htmlFor="og_image" className="block text-sm font-medium text-gray-700 mb-1">
-                  社交媒體圖片 URL
+                  社交媒體圖片
                 </label>
-                <input
-                  id="og_image"
-                  type="text"
-                  value={settings.seo.ogImage as string}
-                  onChange={(e) => handleInputChange('seo', 'ogImage', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                  placeholder="https://www.example.com/images/og-image.jpg"
-                />
-                <p className="mt-1 text-sm text-gray-500">分享時顯示的預覽圖片（建議尺寸 1200x630 像素）</p>
+                
+                <div className="flex gap-4 items-start">
+                  <div className="flex-grow">
+                    <input
+                      id="og_image"
+                      type="text"
+                      value={settings.seo.ogImage as string}
+                      onChange={(e) => handleInputChange('seo', 'ogImage', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="https://www.example.com/images/og-image.jpg"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">分享時顯示的預覽圖片（建議尺寸 1200x630 像素）</p>
+                  </div>
+                  
+                  <div>
+                    <button
+                      type="button"
+                      onClick={triggerFileInput}
+                      className="flex items-center px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      選擇檔案
+                    </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                  
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleUploadImage}
+                      disabled={!selectedFile || uploadingStatus === 'uploading'}
+                      className={`flex items-center px-4 py-2 rounded-md bg-amber-700 text-white hover:bg-amber-800 transition-colors ${
+                        !selectedFile || uploadingStatus === 'uploading' ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {uploadingStatus === 'uploading' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          上傳中...
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          上傳圖片
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* 圖片預覽 */}
+                {(imagePreview || settings.seo.ogImage) && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">圖片預覽：</p>
+                    <div className="relative w-full max-w-md h-48 border rounded overflow-hidden">
+                      <Image
+                        src={imagePreview || settings.seo.ogImage as string}
+                        alt="Open Graph 圖片預覽"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    {uploadingStatus === 'uploaded' && (
+                      <div className="mt-2 flex items-center text-green-600">
+                        <Check className="w-4 h-4 mr-1" />
+                        <span className="text-sm">上傳成功！</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div>
@@ -444,15 +603,36 @@ export default function SiteSettings() {
                 <label htmlFor="email_template" className="block text-sm font-medium text-gray-700 mb-1">
                   通知信模板
                 </label>
-                <textarea
-                  id="email_template"
-                  value={settings.email.notificationTemplate as string}
-                  onChange={(e) => handleInputChange('email', 'notificationTemplate', e.target.value)}
-                  rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                  placeholder="您有新的客戶諮詢: {{name}} ({{email}}) {{phone}} 訊息: {{message}}"
-                />
-                <div className="mt-2 text-sm text-gray-500">
+                
+                <div className="border border-gray-300 rounded-md overflow-hidden">
+                  <ReactQuill 
+                    theme="snow"
+                    value={settings.email.notificationTemplate as string}
+                    onChange={(content) => handleInputChange('email', 'notificationTemplate', content)}
+                    placeholder="您有新的客戶諮詢: {{name}} ({{email}}) {{phone}} 訊息: {{message}}"
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{'color': []}, {'background': []}],
+                        [{'list': 'ordered'}, {'list': 'bullet'}],
+                        ['link'],
+                        ['clean']
+                      ],
+                    }}
+                    className="h-40"
+                  />
+                </div>
+                
+                <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">模板預覽：</h4>
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: settings.email.notificationTemplate as string }}
+                  />
+                </div>
+                
+                <div className="mt-4 text-sm text-gray-500">
                   <p>支持以下變數:</p>
                   <ul className="list-disc list-inside ml-2 mt-1">
                     <li><code className="bg-gray-100 px-1 rounded">{'{{name}}'}</code> - 客戶姓名</li>

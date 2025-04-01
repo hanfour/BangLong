@@ -31,27 +31,56 @@ export async function POST(request: NextRequest) {
     }
     
     const { subject, captcha, captchaId } = validationResult.data;
-    const emailBody = validationResult.data.body;
+    let emailBody = validationResult.data.body;
     
     // 從設定獲取收件人列表
     let to = "hanfourhuang@gmail.com"; // 默認收件人
     
     try {
-      // 嘗試從設定中獲取收件人
-      const emailSettings = await prisma.siteSettings.findUnique({
-        where: {
-          type_key: {
-            type: 'email',
-            key: 'receivers'
+      // 嘗試從設定中獲取收件人和模板
+      const [receiversSetting, templateSetting] = await Promise.all([
+        prisma.siteSettings.findUnique({
+          where: {
+            type_key: {
+              type: 'email',
+              key: 'receivers'
+            }
           }
-        }
-      });
+        }),
+        prisma.siteSettings.findUnique({
+          where: {
+            type_key: {
+              type: 'email',
+              key: 'notificationTemplate'
+            }
+          }
+        })
+      ]);
       
-      if (emailSettings?.value) {
-        to = emailSettings.value; // 使用設定中的收件人
+      // 處理收件人
+      if (receiversSetting?.value) {
+        to = receiversSetting.value; // 使用設定中的收件人
         console.log('使用設定的收件人:', to);
       } else {
         console.log('未找到設定的收件人，使用默認值:', to);
+      }
+      
+      // 處理模板 (使用模板替換變量)
+      if (templateSetting?.value) {
+        // 如果有自定義模板，替換其中的變量
+        let customTemplate = templateSetting.value;
+        const formData = body; // 使用已驗證的請求數據
+        
+        // 替換模板變量
+        customTemplate = customTemplate
+          .replace(/{{name}}/g, formData.name || '')
+          .replace(/{{email}}/g, formData.email || '')
+          .replace(/{{phone}}/g, formData.phone || '')
+          .replace(/{{message}}/g, formData.message || '');
+          
+        // 使用自定義模板
+        emailBody = customTemplate;
+        console.log('使用自定義郵件模板');
       }
     } catch (error) {
       console.error('獲取收件人設定時發生錯誤:', error);

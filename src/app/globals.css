@@ -90,3 +90,20 @@ body {
     text-orientation: mixed;
   }
 }
+
+/* Quill editor styles */
+@import 'react-quill/dist/quill.snow.css';
+
+/* 自定義 Quill 編輯器樣式 */
+.quill > .ql-container > .ql-editor.ql-blank::before {
+  font-style: normal;
+  color: rgba(107, 114, 128, 0.7);
+}
+
+.ql-container {
+  min-height: 120px;
+}
+
+.prose img {
+  margin: 0 auto;
+}
