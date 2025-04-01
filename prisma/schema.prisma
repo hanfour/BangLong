@@ -23,6 +23,7 @@ model Carousel {
   title        String?
   imageUrl     String
   linkUrl      String?
+  linkText     String?  // 新增: 連結文字
   order        Int
   isActive     Boolean  @default(true)
   textPosition String   @default("center") // 文字位置: topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight

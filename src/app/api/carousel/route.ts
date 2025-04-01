@@ -59,17 +59,21 @@ export async function POST(request: Request) {
     const newOrder = lastItem ? lastItem.order + 1 : 1;
     
     // 创建新轮播项
-    const newCarousel = await prisma.carousel.create({
-      data: {
+    const carouselData = {
         title: data.title || '',
         imageUrl: data.imageUrl,
         linkUrl: data.linkUrl || null,
-        linkText: data.linkText || null,
+        linkText: data.linkText || null, // 已完成遷移，恢復此欄位
         order: newOrder,
         isActive: true,
         textPosition: data.textPosition || 'center',
         textDirection: data.textDirection || 'horizontal'
-      }
+    };
+    
+    console.log('嘗試創建輪播項目: ', carouselData);
+    
+    const newCarousel = await prisma.carousel.create({
+      data: carouselData
     });
     
     console.log('成功創建輪播項目:', newCarousel);
