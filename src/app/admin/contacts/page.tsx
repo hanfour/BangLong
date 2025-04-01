@@ -239,7 +239,8 @@ export default function ContactsPage() {
       // 更新活動表單
       setActiveContact(prev => prev ? { ...prev, reply: replyText, status: 'completed' } : null);
       
-      setSuccess('回覆已成功提交並標記為已完成');
+      // 成功提示，添加關於自動發送郵件的說明
+      setSuccess('回覆已成功提交並標記為已完成，系統將自動發送回覆郵件至客戶的電子郵箱。');
       
       // 更新統計資料
       fetchContacts();
@@ -252,7 +253,7 @@ export default function ContactsPage() {
       // 3秒後清除成功消息
       setTimeout(() => {
         setSuccess('');
-      }, 3000);
+      }, 5000); // 延長時間為5秒，讓用戶有足夠時間閱讀
     }
   };
 

@@ -7,8 +7,10 @@ import { prisma } from '@/lib/db';
 const sendEmailSchema = z.object({
   subject: z.string().min(2, { message: '主旨不能為空' }),
   body: z.string().min(10, { message: '郵件內容不能為空' }),
-  captcha: z.string().length(4, { message: '驗證碼必須是 4 位數字' }),
-  captchaId: z.string().uuid({ message: '無效的驗證碼ID' }),
+  captcha: z.string().min(1, { message: '驗證碼不能為空' }),
+  captchaId: z.string().min(1, { message: '驗證碼ID不能為空' }),
+  isAdminReply: z.boolean().optional(), // 可選參數，標記是否為管理員回覆
+  to: z.string().email().optional(), // 可選參數，指定收件人郵箱
 });
 
 export async function POST(request: NextRequest) {
@@ -30,57 +32,62 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { subject, captcha, captchaId } = validationResult.data;
+    const { subject, captcha, captchaId, isAdminReply } = validationResult.data;
     let emailBody = validationResult.data.body;
     
-    // 從設定獲取收件人列表
-    let to = "hanfourhuang@gmail.com"; // 默認收件人
+    // 從設定獲取收件人列表或使用指定的收件人
+    // 如果是管理員回覆，使用指定的收件人
+    let to = validationResult.data.to || "hanfourhuang@gmail.com"; // 默認或指定的收件人
     
     try {
-      // 嘗試從設定中獲取收件人和模板
-      const [receiversSetting, templateSetting] = await Promise.all([
-        prisma.siteSettings.findUnique({
-          where: {
-            type_key: {
-              type: 'email',
-              key: 'receivers'
+      // 如果不是管理員回覆，則從設定中獲取收件人和模板
+      if (!isAdminReply) {
+        const [receiversSetting, templateSetting] = await Promise.all([
+          prisma.siteSettings.findUnique({
+            where: {
+              type_key: {
+                type: 'email',
+                key: 'receivers'
+              }
             }
-          }
-        }),
-        prisma.siteSettings.findUnique({
-          where: {
-            type_key: {
-              type: 'email',
-              key: 'notificationTemplate'
+          }),
+          prisma.siteSettings.findUnique({
+            where: {
+              type_key: {
+                type: 'email',
+                key: 'notificationTemplate'
+              }
             }
-          }
-        })
-      ]);
-      
-      // 處理收件人
-      if (receiversSetting?.value) {
-        to = receiversSetting.value; // 使用設定中的收件人
-        console.log('使用設定的收件人:', to);
-      } else {
-        console.log('未找到設定的收件人，使用默認值:', to);
-      }
-      
-      // 處理模板 (使用模板替換變量)
-      if (templateSetting?.value) {
-        // 如果有自定義模板，替換其中的變量
-        let customTemplate = templateSetting.value;
-        const formData = body; // 使用已驗證的請求數據
+          })
+        ]);
         
-        // 替換模板變量
-        customTemplate = customTemplate
-          .replace(/{{name}}/g, formData.name || '')
-          .replace(/{{email}}/g, formData.email || '')
-          .replace(/{{phone}}/g, formData.phone || '')
-          .replace(/{{message}}/g, formData.message || '');
+        // 處理收件人
+        if (receiversSetting?.value) {
+          to = receiversSetting.value; // 使用設定中的收件人
+          console.log('使用設定的收件人:', to);
+        } else {
+          console.log('未找到設定的收件人，使用默認值:', to);
+        }
+        
+        // 處理模板 (使用模板替換變量)
+        if (templateSetting?.value) {
+          // 如果有自定義模板，替換其中的變量
+          let customTemplate = templateSetting.value;
+          const formData = body; // 使用已驗證的請求數據
           
-        // 使用自定義模板
-        emailBody = customTemplate;
-        console.log('使用自定義郵件模板');
+          // 替換模板變量
+          customTemplate = customTemplate
+            .replace(/{{name}}/g, formData.name || '')
+            .replace(/{{email}}/g, formData.email || '')
+            .replace(/{{phone}}/g, formData.phone || '')
+            .replace(/{{message}}/g, formData.message || '');
+            
+          // 使用自定義模板
+          emailBody = customTemplate;
+          console.log('使用自定義郵件模板');
+        }
+      } else {
+        console.log('管理員回覆郵件，使用指定的郵件內容和收件人');
       }
     } catch (error) {
       console.error('獲取收件人設定時發生錯誤:', error);
