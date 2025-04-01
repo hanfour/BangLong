@@ -48,57 +48,37 @@ export default function Dashboard() {
     setError(null);
     
     try {
-      // 針對輪播部分實際調用API獲取數量，其他模擬數據
-      const carouselResponse = await fetch('/api/carousel/admin', {
-        headers: {
-          'Cache-Control': 'no-cache'
-        },
-        credentials: 'include'
-      });
+      // 使用並行請求獲取所有數據
+      const [carouselRes, contactsRes, usersRes] = await Promise.all([
+        // 獲取輪播數據
+        fetch('/api/carousel/admin', {
+          headers: { 'Cache-Control': 'no-cache' },
+          credentials: 'include'
+        }).then(res => res.json()),
+        
+        // 獲取聯絡表單數據
+        fetch('/api/contacts/admin').then(res => res.json()),
+        
+        // 獲取用戶數據
+        fetch('/api/users').then(res => res.json())
+      ]);
       
-      let carouselCount = 0;
+      // 計算新的聯絡表單數量
+      const contactStats = contactsRes.statusStats || [];
+      const newContactCount = contactStats.find((stat: any) => stat.status === 'new')?.count || 0;
       
-      if (carouselResponse.ok) {
-        const carouselData = await carouselResponse.json();
-        carouselCount = carouselData.carouselItems?.length || 0;
-      }
-      
-      // 其他模擬數據
+      // 更新數據
       setStats({
-        carouselCount,
-        projectCount: 12,
+        carouselCount: carouselRes.data?.length || 0,
+        projectCount: 12, // 目前無API，使用模擬數據
         projectsNew: 4,
         projectsClassic: 6,
         projectsFuture: 2,
-        documentCount: 8,
-        contactCount: 24,
-        newContactCount: 7,
-        userCount: 3
+        documentCount: 8, // 目前無API，使用模擬數據
+        contactCount: contactsRes.total || 0,
+        newContactCount: Number(newContactCount),
+        userCount: usersRes.data?.length || 0
       });
-      
-      // 完整實現時應使用如下並行請求：
-      // const [carouselRes, projectsRes, documentsRes, contactsRes, usersRes] = await Promise.all([
-      //   fetch('/api/carousel/admin', {
-      //     headers: { 'Cache-Control': 'no-cache' },
-      //     credentials: 'include'
-      //   }).then(res => res.json()),
-      //   fetch('/api/projects/stats').then(res => res.json()),
-      //   fetch('/api/documents').then(res => res.json()),
-      //   fetch('/api/contacts/stats').then(res => res.json()),
-      //   fetch('/api/users').then(res => res.json())
-      // ]);
-      // 
-      // setStats({
-      //   carouselCount: carouselRes.carouselItems?.length || 0,
-      //   projectCount: projectsRes.total || 0,
-      //   projectsNew: projectsRes.new || 0,
-      //   projectsClassic: projectsRes.classic || 0,
-      //   projectsFuture: projectsRes.future || 0,
-      //   documentCount: documentsRes.documents?.length || 0,
-      //   contactCount: contactsRes.total || 0,
-      //   newContactCount: contactsRes.new || 0,
-      //   userCount: usersRes.users?.length || 0
-      // });
     } catch (error) {
       console.error('獲取數據失敗:', error);
       setError('獲取儀表板數據失敗，請重新整理頁面或稍後再試');

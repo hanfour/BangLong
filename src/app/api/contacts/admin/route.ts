@@ -15,11 +15,45 @@ export async function GET(request: NextRequest) {
     // 獲取查詢參數
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status') || undefined;
+    const search = searchParams.get('search') || undefined;
+    const startDate = searchParams.get('startDate') || undefined;
+    const endDate = searchParams.get('endDate') || undefined;
     const limit = Number(searchParams.get('limit')) || 100;
     const offset = Number(searchParams.get('offset')) || 0;
 
     // 構建查詢條件
-    const where = status ? { status } : {};
+    let where: any = {};
+    
+    // 狀態過濾
+    if (status) {
+      where.status = status;
+    }
+    
+    // 搜尋功能
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { message: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    
+    // 日期範圍過濾
+    if (startDate || endDate) {
+      where.createdAt = {};
+      
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        // 增加一天確保包含整個結束日期
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        where.createdAt.lte = endDateTime;
+      }
+    }
 
     // 查詢資料
     const contactSubmissions = await prisma.contactSubmission.findMany({
@@ -31,12 +65,20 @@ export async function GET(request: NextRequest) {
 
     // 獲取總數
     const total = await prisma.contactSubmission.count({ where });
+    
+    // 獲取每個狀態的數量統計
+    const statusStats = await prisma.$queryRaw`
+      SELECT status, COUNT(*) as count 
+      FROM "ContactSubmission" 
+      GROUP BY status
+    `;
 
     return NextResponse.json({
       data: contactSubmissions,
       total,
       limit,
       offset,
+      statusStats,
     });
   } catch (error) {
     console.error('獲取聯絡表單列表失敗:', error);
