@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     console.log('發送郵件:', {
       to,
       subject,
-      body: emailBody
+      body: emailBody.substring(0, 100) + '...' // 只記錄部分內容
     });
     
     // 使用 AWS API Gateway 發送郵件
@@ -143,12 +143,15 @@ export async function POST(request: NextRequest) {
         {
           to,
           subject,
-          text: emailBody,
+          text: emailBody, // 純文本版本
+          html: emailBody, // HTML 版本
           // 嘗試使用其他可能的參數命名
           message: emailBody,
           body: emailBody,
           content: emailBody,
-          email: to
+          email: to,
+          htmlBody: emailBody, // 額外的 HTML 參數
+          htmlContent: emailBody // 額外的 HTML 參數
         },
         {
           headers: {

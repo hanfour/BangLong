@@ -140,36 +140,79 @@ export async function PATCH(request: NextRequest) {
     if (reply && (status === 'completed' || contactSubmission.status === 'completed')) {
       try {
         // 準備發送郵件
-        const replyReminder = "\n\n在此提醒您，請勿直接回覆或透過此郵件地址與我們聯繫，我們將不會收到您所留下的任何訊息。";
+        const replyReminder = "在此提醒您，請勿直接回覆或透過此郵件地址與我們聯繫，我們將不會收到您所留下的任何訊息。";
         const emailSubject = `[邦隆建設] 您的諮詢已回覆 - 案件編號 ${id.substring(0, 8)}`;
-        const emailBody = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #40220f;">邦隆建設客戶服務部</h2>
-          <p>親愛的 ${contactSubmission.name} 您好：</p>
-          <p>感謝您對邦隆建設的信任與支持。我們已處理您於 ${new Date(contactSubmission.createdAt).toLocaleDateString('zh-TW')} 提交的諮詢，詳情如下：</p>
+        
+        // 創建純HTML格式郵件，使用表格布局以獲得更好的郵件客戶端兼容性
+        const emailBody = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邦隆建設回覆通知</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #333333;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td style="padding: 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 5px;">
+          <!-- 標題 -->
+          <tr>
+            <td style="padding: 20px; text-align: center; background-color: #f9f5f0; border-radius: 5px 5px 0 0;">
+              <h1 style="color: #40220f; margin: 0; font-size: 24px;">邦隆建設客戶服務部</h1>
+            </td>
+          </tr>
           
-          <div style="background-color: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #a48b78;">
-            <p style="margin: 0 0 10px 0;"><strong>您的原始諮詢內容：</strong></p>
-            <p style="margin: 0;">${contactSubmission.message.replace(/\n/g, '<br>')}</p>
-          </div>
+          <!-- 內容 -->
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin-top: 0;">親愛的 <strong>${contactSubmission.name}</strong> 您好：</p>
+              <p>感謝您對邦隆建設的信任與支持。我們已處理您於 ${new Date(contactSubmission.createdAt).toLocaleDateString('zh-TW')} 提交的諮詢，詳情如下：</p>
+              
+              <!-- 原始諮詢 -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 20px 0; background-color: #f5f5f5; border-left: 4px solid #a48b78;">
+                <tr>
+                  <td style="padding: 15px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">您的原始諮詢內容：</p>
+                    <p style="margin: 0;">${contactSubmission.message.replace(/\n/g, '<br>')}</p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- 回覆內容 -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 20px 0; border-left: 4px solid #40220f;">
+                <tr>
+                  <td style="padding: 15px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">我們的回覆：</p>
+                    <div style="margin: 0;">${reply}</div>
+                  </td>
+                </tr>
+              </table>
+              
+              <p>如您有任何進一步的問題或需求，歡迎透過以下方式與我們聯繫：</p>
+              
+              <ul style="padding-left: 20px;">
+                <li>電話：(02) XXXX-XXXX</li>
+                <li>官網：<a href="https://www.banglongconstruction.com" style="color: #a48b78; text-decoration: underline;">www.banglongconstruction.com</a></li>
+              </ul>
+              
+              <p style="color: #ff6600; font-style: italic; margin: 20px 0; padding: 10px; border: 1px dashed #ff6600; background-color: #fff8f0;">${replyReminder}</p>
+            </td>
+          </tr>
           
-          <div style="padding: 15px; margin: 15px 0; border-left: 4px solid #40220f;">
-            <p style="margin: 0 0 10px 0;"><strong>我們的回覆：</strong></p>
-            <p style="margin: 0;">${reply.replace(/\n/g, '<br>')}</p>
-          </div>
-          
-          <p>如您有任何進一步的問題或需求，歡迎透過以下方式與我們聯繫：</p>
-          <ul>
-            <li>電話：(02) XXXX-XXXX</li>
-            <li>官網：<a href="https://www.banglongconstruction.com" style="color: #a48b78;">www.banglongconstruction.com</a></li>
-          </ul>
-          
-          <p style="color: #ff6600; font-style: italic;">${replyReminder}</p>
-          
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777;">
-            <p>此郵件由系統自動發送，請勿直接回覆。</p>
-            <p>© ${new Date().getFullYear()} 邦隆建設 版權所有</p>
-          </div>
-        </div>`;
+          <!-- 頁尾 -->
+          <tr>
+            <td style="padding: 20px; text-align: center; background-color: #f5f5f5; border-top: 1px solid #dddddd; font-size: 12px; color: #777777; border-radius: 0 0 5px 5px;">
+              <p style="margin: 0 0 5px 0;">此郵件由系統自動發送，請勿直接回覆。</p>
+              <p style="margin: 0;">© ${new Date().getFullYear()} 邦隆建設 版權所有</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
         
         // 發送郵件
         let apiUrl = '/api/sendEmail';
