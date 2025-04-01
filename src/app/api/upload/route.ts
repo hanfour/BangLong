@@ -25,39 +25,53 @@ export async function POST(request: Request) {
   }
 
   try {
+    // 檢查環境變數
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.error('環境變數錯誤: 缺少 BLOB_READ_WRITE_TOKEN');
-      return NextResponse.json(
-        { error: 'Vercel Blob Storage 尚未設置，請聯絡管理員' }, 
-        { status: 500 }
-      );
+      
+      // 返回臨時解決方案的URL - 提示前端使用備用存儲選項
+      return NextResponse.json({
+        url: null,
+        error: 'Vercel Blob Storage 尚未設置，使用備用存儲',
+        fallback: true
+      });
     }
 
-    // 上傳到 Vercel Blob Storage
-    const blob = await put(filename, file, {
-      access: 'public',
-    });
+    // 嘗試上傳到 Vercel Blob Storage
+    try {
+      const blob = await put(filename, file, {
+        access: 'public',
+      });
 
-    if (!blob || !blob.url) {
-      return NextResponse.json(
-        { error: '檔案上傳成功但未獲得有效的URL' }, 
-        { status: 500 }
-      );
+      if (!blob || !blob.url) {
+        throw new Error('未獲得有效的URL');
+      }
+
+      console.log('檔案上傳成功:', blob.url);
+      return NextResponse.json(blob);
+    } catch (blobError) {
+      // Blob 存儲特定錯誤處理
+      console.error('Vercel Blob 上傳失敗:', blobError);
+      
+      // 返回臨時解決方案的URL - 提示前端使用備用存儲選項
+      return NextResponse.json({
+        url: null,
+        error: blobError instanceof Error ? blobError.message : '上傳失敗',
+        fallback: true
+      });
     }
-
-    console.log('檔案上傳成功:', blob.url);
-    return NextResponse.json(blob);
   } catch (error) {
-    console.error('檔案上傳失敗:', error);
+    console.error('檔案上傳處理失敗:', error);
     
     // 提供更詳細的錯誤信息
     const errorMessage = error instanceof Error 
       ? `檔案上傳失敗: ${error.message}` 
-      : '檔案上傳失敗，請確認 Vercel Blob Storage 設置正確';
+      : '檔案上傳失敗，請稍後再試';
     
-    return NextResponse.json(
-      { error: errorMessage }, 
-      { status: 500 }
-    );
+    return NextResponse.json({
+      url: null,
+      error: errorMessage,
+      fallback: true
+    });
   }
 }

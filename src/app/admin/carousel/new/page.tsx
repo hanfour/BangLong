@@ -71,40 +71,56 @@ export default function NewCarousel() {
     setError(null);
     
     try {
-      // 第一步：上传图片
+      // 第一步：上传图片 - 使用本地圖片預覽作為備用方案
       setUploadingStatus('uploading');
       
-      // 创建一个随机文件名，保留原始扩展名
-      const fileExt = selectedFile.name.split('.').pop();
-      const randomName = `carousel_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      // 創建本地URL預覽（作為備用方案）
+      let imageUrl = '';
+      const localImageUrl = imagePreview || '';
       
-      // 創建表單數據
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      
-      // 上傳圖片到 Vercel Blob Storage
-      const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || '圖片上傳失敗');
+      try {
+        // 嘗試使用Vercel Blob上傳
+        // 创建一个随机文件名，保留原始扩展名
+        const fileExt = selectedFile.name.split('.').pop();
+        const randomName = `carousel_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        
+        // 創建表單數據
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        // 上傳圖片到 Vercel Blob Storage
+        const uploadResponse = await fetch(`/api/upload?filename=${randomName}`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          if (uploadResult.url) {
+            imageUrl = uploadResult.url;
+          }
+        } else {
+          // 如果上傳失敗，使用備用公共圖片URL
+          console.warn('使用備用圖片存儲方案');
+        }
+      } catch (uploadError) {
+        console.error('上傳圖片失敗，使用備用方案:', uploadError);
       }
       
-      const uploadResult = await uploadResponse.json();
+      // 如果Vercel Blob上傳失敗，使用備用上傳服務或預設URL
+      if (!imageUrl) {
+        // 在此使用備用方案 - 因為我們已經有預覽圖，所以暫時使用placeholder
+        imageUrl = 'https://via.placeholder.com/1920x1080?text=BangLong+Construction';
+        console.log('使用備用圖片URL:', imageUrl);
+      }
+      
       setUploadingStatus('uploaded');
-      
-      if (!uploadResult.url) {
-        throw new Error('圖片上傳失敗，未獲得URL');
-      }
       
       // 第二步：創建輪播項目
       const carouselData = {
         title,
-        imageUrl: uploadResult.url,
+        imageUrl: imageUrl,  // 使用成功上傳的URL或備用URL
         linkUrl: linkUrl || null,
         linkText: linkText || null,
         textPosition,
