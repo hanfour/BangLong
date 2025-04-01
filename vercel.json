@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "buildCommand": "npx prisma generate && next build",
+  "devCommand": "next dev",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "functions": {
