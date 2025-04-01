@@ -106,7 +106,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
         <div className="absolute bottom-0 w-64 p-6 border-t border-gray-200 bg-white">
           <button
-            onClick={() => signOut({ callbackUrl: '/admin/login' })}
+            onClick={() => signOut({ 
+              callbackUrl: '/admin/login',
+              redirect: true
+            })}
             className="w-full px-4 py-2 text-white bg-amber-800 rounded hover:bg-amber-900 flex items-center justify-center"
           >
             <LogOut className="w-4 h-4 mr-2" /> 登出

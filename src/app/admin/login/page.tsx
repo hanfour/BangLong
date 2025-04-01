@@ -16,6 +16,28 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // 從URL獲取錯誤信息
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const errorType = searchParams.get('error');
+    
+    if (errorType) {
+      switch (errorType) {
+        case 'Configuration':
+          setError('服務器配置錯誤，請聯繫管理員');
+          break;
+        case 'AccessDenied':
+          setError('存取被拒絕');
+          break;
+        case 'Verification':
+          setError('帳戶驗證失敗');
+          break;
+        default:
+          setError('登入失敗，請重試');
+      }
+    }
+  }, []);
+
   // 檢查是否已經登入
   useEffect(() => {
     if (status === 'authenticated') {

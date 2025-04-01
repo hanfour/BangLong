@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { verifyCaptcha } from '../captcha/route';
 import axios from 'axios';
 
 // 表單驗證架構
