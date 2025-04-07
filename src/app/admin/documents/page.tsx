@@ -342,9 +342,9 @@ export default function DocumentsPage() {
   const getCategoryName = (category: string) => {
     switch(category) {
       case 'handbook': return '交屋手冊';
-      case 'process': return '售服流程';
-      case 'manual': return '使用說明';
-      case 'warranty': return '保固資訊';
+      // case 'process': return '售服流程';
+      // case 'manual': return '使用說明';
+      // case 'warranty': return '保固資訊';
       default: return category;
     }
   };
@@ -438,9 +438,9 @@ export default function DocumentsPage() {
               >
                 <option value="">所有類別</option>
                 <option value="handbook">交屋手冊</option>
-                <option value="process">售服流程</option>
-                <option value="manual">使用說明</option>
-                <option value="warranty">保固資訊</option>
+                {/* <option value="process">售服流程</option> */}
+                {/* <option value="manual">使用說明</option> */}
+                {/* <option value="warranty">保固資訊</option> */}
               </select>
               
               <button
@@ -629,7 +629,7 @@ export default function DocumentsPage() {
                         required
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                       />
                     </div>
                     
@@ -642,7 +642,7 @@ export default function DocumentsPage() {
                         rows={3}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                       />
                     </div>
                     
@@ -655,12 +655,12 @@ export default function DocumentsPage() {
                         required
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                       >
                         <option value="handbook">交屋手冊</option>
-                        <option value="process">售服流程</option>
-                        <option value="manual">使用說明</option>
-                        <option value="warranty">保固資訊</option>
+                        {/* <option value="process">售服流程</option> */}
+                        {/* <option value="manual">使用說明</option> */}
+                        {/* <option value="warranty">保固資訊</option> */}
                       </select>
                     </div>
                     
@@ -672,7 +672,7 @@ export default function DocumentsPage() {
                         id="projectId"
                         value={formData.projectId}
                         onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                       >
                         <option value="">不指定</option>
                         {projects.map((project) => (
@@ -688,8 +688,8 @@ export default function DocumentsPage() {
                       <label className="block text-sm font-medium text-gray-700">
                         文件 <span className="text-red-500">*</span>
                       </label>
-                      <div className="mt-1 flex items-center">
-                        <div className="flex-grow relative border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                      <div className="mt-1 flex items-stretch">
+                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 max-w-[80%]">
                           <div className="flex items-center">
                             {fileToUpload ? (
                               <>
@@ -715,7 +715,7 @@ export default function DocumentsPage() {
                         </div>
                         <label
                           htmlFor="file-upload"
-                          className="ml-2 cursor-pointer inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                          className="ml-2 cursor-pointer inline-flex flex-1 justify-center items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                         >
                           <Upload className="h-4 w-4 mr-1" />
                           瀏覽
@@ -746,7 +746,7 @@ export default function DocumentsPage() {
                         <label htmlFor="fileUrl" className="block text-xs font-medium text-gray-500">
                           或直接輸入文件URL
                         </label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
+                        <div className="mt-1 flex rounded-md">
                           <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                             <Link className="h-4 w-4" />
                           </span>
@@ -767,8 +767,8 @@ export default function DocumentsPage() {
                       <label className="block text-sm font-medium text-gray-700">
                         封面圖片
                       </label>
-                      <div className="mt-1 flex items-center">
-                        <div className="flex-grow relative border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                      <div className="mt-1 flex items-stretch">
+                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 max-w-[80%]">
                           <div className="flex items-center">
                             {imageToUpload ? (
                               <>
@@ -798,7 +798,7 @@ export default function DocumentsPage() {
                         </div>
                         <label
                           htmlFor="image-upload"
-                          className="ml-2 cursor-pointer inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                          className="ml-2 cursor-pointer inline-flex flex-1 justify-center items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                         >
                           <Upload className="h-4 w-4 mr-1" />
                           瀏覽
@@ -830,7 +830,7 @@ export default function DocumentsPage() {
                         <label htmlFor="imageUrl" className="block text-xs font-medium text-gray-500">
                           或直接輸入圖片URL
                         </label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
+                        <div className="mt-1 flex rounded-md">
                           <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                             <Link className="h-4 w-4" />
                           </span>
@@ -867,7 +867,7 @@ export default function DocumentsPage() {
                         required
                         value={formData.fileType}
                         onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                         placeholder="pdf, docx, jpg..."
                       />
                     </div>
@@ -882,7 +882,7 @@ export default function DocumentsPage() {
                         min="1"
                         value={formData.order}
                         onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                       />
                     </div>
                     
@@ -904,7 +904,7 @@ export default function DocumentsPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting || isUploading}
-                    className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
+                    className={`w-full inline-flex justify-center rounded-md border border-transparent px-4 py-2 ${
                       isSubmitting || isUploading
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-amber-800 text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500'
@@ -924,7 +924,7 @@ export default function DocumentsPage() {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     取消
                   </button>
@@ -966,7 +966,7 @@ export default function DocumentsPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={isSubmitting}
-                  className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
+                  className={`w-full inline-flex justify-center rounded-md border border-transparent px-4 py-2 ${
                     isSubmitting
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
@@ -984,7 +984,7 @@ export default function DocumentsPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteModal(false)}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   取消
                 </button>
