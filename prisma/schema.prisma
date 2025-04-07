@@ -19,31 +19,31 @@ model User {
 }
 
 model Carousel {
-  id           String   @id @default(cuid())
-  title        String?
-  imageUrl     String
-  linkUrl      String?
-  linkText     String?  // 新增: 連結文字
-  order        Int
-  isActive     Boolean  @default(true)
-  textPosition String   @default("center") // 文字位置: topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight
-  textDirection String  @default("horizontal") // 文字方向: horizontal, vertical
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String?
+  imageUrl      String
+  linkUrl       String?
+  order         Int
+  isActive      Boolean  @default(true)
+  textPosition  String   @default("center")
+  textDirection String   @default("horizontal")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  linkText      String?
 }
 
 model Project {
   id          String     @id @default(cuid())
   title       String
-  description String?    @db.Text
-  category    String     // 新案鑑賞、歷年經典、未來計畫
+  description String?
+  category    String
   imageUrl    String
-  details     Json?      // 可儲存複雜的項目資訊
+  details     Json?
   order       Int
   isActive    Boolean    @default(true)
-  documents   Document[] // 關聯的文件
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  documents   Document[]
 }
 
 model Document {
@@ -51,15 +51,15 @@ model Document {
   title       String
   description String?
   fileUrl     String
-  imageUrl    String?  // 封面圖片
-  fileType    String   // pdf, docx 等
-  category    String   // 交屋手冊、售服流程等
+  fileType    String
+  category    String
   order       Int
   isActive    Boolean  @default(true)
-  projectId   String?  // 關聯到專案
-  project     Project? @relation(fields: [projectId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  imageUrl    String?
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
 }
 
 model ContactSubmission {
@@ -67,22 +67,22 @@ model ContactSubmission {
   name      String
   email     String
   phone     String?
-  message   String   @db.Text
-  status    String   @default("new") // new, processing, completed
-  reply     String?  @db.Text
-  archived  Boolean  @default(false)
+  message   String
+  status    String   @default("new")
+  reply     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  archived  Boolean  @default(false)
 }
 
 model SiteSettings {
-  id             String   @id @default(cuid())
-  type           String   // 設定類型: seo, email, other
-  key            String   // 設定鍵名，如: title, description, receiveEmails
-  value          String   @db.Text // 設定值
-  description    String?  // 設定描述
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          String   @id @default(cuid())
+  type        String
+  key         String
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([type, key])
 }

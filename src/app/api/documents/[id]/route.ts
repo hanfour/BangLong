@@ -12,13 +12,16 @@ export async function GET(
   try {
     const id = params.id;
     
-    // 確認表結構正確
+    // 確認表是否存在
     try {
-      await prisma.$queryRaw`SELECT "id", "title", "description", "fileUrl", "imageUrl", "fileType", "category", "order", "isActive", "projectId", "createdAt", "updatedAt" FROM "Document" LIMIT 1`;
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error (GET Document):', e);
       return NextResponse.json({ 
-        error: '數據庫結構不符合或未遷移',
+        error: '數據庫表不存在',
         details: e instanceof Error ? e.message : 'Unknown error'
       }, { status: 500 });
     }

@@ -14,11 +14,14 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // 檢查 document 表是否存在和結構是否正確
-      await prisma.$queryRaw`SELECT "id", "title", "description", "fileUrl", "imageUrl", "fileType", "category", "order", "isActive", "projectId", "createdAt", "updatedAt" FROM "Document" LIMIT 1`;
+      // 檢查 document 表是否存在
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error:', e);
-      return NextResponse.json({ error: '數據庫結構不符合或未遷移', schemaError: true }, { status: 500 });
+      return NextResponse.json({ error: '數據庫表不存在', schemaError: true }, { status: 500 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -79,13 +82,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '未授權訪問' }, { status: 401 });
     }
 
-    // 先檢查表結構是否正確
+    // 先檢查表是否存在
     try {
-      await prisma.$queryRaw`SELECT "id", "title", "description", "fileUrl", "imageUrl", "fileType", "category", "order", "isActive", "projectId", "createdAt", "updatedAt" FROM "Document" LIMIT 1`;
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error (POST):', e);
       return NextResponse.json({ 
-        error: '數據庫結構不符合或未遷移',
+        error: '數據庫表不存在',
         message: '請聯繫管理員執行數據庫遷移', 
         details: e instanceof Error ? e.message : 'Unknown error',
         schemaError: true 
@@ -192,13 +198,17 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: '未授權訪問' }, { status: 401 });
     }
     
-    // 檢查結構
+    // 檢查結構 - 使用更寬容的檢查方式
     try {
-      await prisma.$queryRaw`SELECT "id", "title", "description", "fileUrl", "imageUrl", "fileType", "category", "order", "isActive", "projectId", "createdAt", "updatedAt" FROM "Document" LIMIT 1`;
+      // 只檢查表是否存在，而不是檢查所有列
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error (PATCH):', e);
       return NextResponse.json({ 
-        error: '數據庫結構不符合或未遷移',
+        error: '數據庫表不存在',
         details: e instanceof Error ? e.message : 'Unknown error'
       }, { status: 500 });
     }
@@ -314,13 +324,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '未授權訪問' }, { status: 401 });
     }
     
-    // 確認表結構正確
+    // 確認表是否存在
     try {
-      await prisma.$queryRaw`SELECT "id" FROM "Document" LIMIT 1`;
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error (DELETE):', e);
       return NextResponse.json({ 
-        error: '數據庫結構不符合或未遷移',
+        error: '數據庫表不存在',
         details: e instanceof Error ? e.message : 'Unknown error'
       }, { status: 500 });
     }

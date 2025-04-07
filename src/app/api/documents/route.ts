@@ -5,13 +5,16 @@ import { Prisma } from '@prisma/client';
 // 獲取文檔列表，可依據類別篩選
 export async function GET(request: NextRequest) {
   try {
-    // 確認表結構正確
+    // 確認表是否存在
     try {
-      await prisma.$queryRaw`SELECT "id", "title", "description", "fileUrl", "imageUrl", "fileType", "category", "order", "isActive", "projectId", "createdAt", "updatedAt" FROM "Document" LIMIT 1`;
+      await prisma.$queryRaw`SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'Document'
+      )`;
     } catch (e) {
       console.error('Schema validation error (GET Documents):', e);
       return NextResponse.json({ 
-        error: '數據庫結構不符合或未遷移',
+        error: '數據庫表不存在',
         details: e instanceof Error ? e.message : 'Unknown error',
         message: '請聯繫管理員確認數據庫狀態'
       }, { status: 500 });

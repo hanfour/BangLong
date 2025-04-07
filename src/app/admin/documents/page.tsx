@@ -62,14 +62,23 @@ export default function DocumentsPage() {
       const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error('無法獲取文檔數據');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API錯誤:', errorData);
+        
+        // 如果是架構錯誤，顯示更具體的錯誤訊息
+        if (errorData.schemaError) {
+          setError(`資料庫架構錯誤: ${errorData.details || errorData.error || '請聯繫管理員'}`);
+        } else {
+          throw new Error(errorData.details || errorData.error || '無法獲取文檔數據');
+        }
+        return;
       }
       
       const data = await response.json();
-      setDocuments(data.documents);
+      setDocuments(data.documents || []);
     } catch (err) {
       console.error('獲取文檔數據失敗:', err);
-      setError('獲取文檔數據失敗，請重試');
+      setError(err instanceof Error ? err.message : '獲取文檔數據失敗，請重試');
     } finally {
       setIsLoading(false);
     }
@@ -387,6 +396,16 @@ export default function DocumentsPage() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-red-700">{error}</p>
+              {error.includes('數據庫') && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700 font-medium">可能的解決方案：</p>
+                  <ol className="list-decimal pl-5 text-sm text-gray-600 mt-1">
+                    <li>請確保已執行 Prisma 遷移：<code className="bg-gray-100 px-1 py-0.5 rounded">npx prisma migrate deploy</code></li>
+                    <li>或執行自動修復腳本：<code className="bg-gray-100 px-1 py-0.5 rounded">node scripts/fix-schema.js</code></li>
+                    <li>如果問題仍然存在，請聯絡開發人員。</li>
+                  </ol>
+                </div>
+              )}
             </div>
           </div>
         </div>
