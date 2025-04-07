@@ -102,8 +102,33 @@ export default function HandbookPage() {
   };
 
   // 選擇專案查看其文檔
-  const handleProjectSelect = (projectId: string) => {
-    setSelectedProject(selectedProject === projectId ? null : projectId);
+  const handleProjectSelect = (documentId: string) => {
+    // 找到選擇的文件
+    const selectedDoc = documents.find(doc => doc.id === documentId);
+    
+    if (selectedDoc && selectedDoc.fileUrl) {
+      // 彈出確認對話框
+      if (window.confirm(`確定要下載 ${selectedDoc.title} 交屋手冊嗎？`)) {
+        // 如果用戶確認，則執行下載
+        window.open(selectedDoc.fileUrl, '_blank');
+        
+        // 選擇性地記錄下載事件
+        try {
+          fetch(`/api/documents/${documentId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ action: 'download' }),
+          });
+        } catch (error) {
+          console.error('無法記錄下載:', error);
+        }
+      }
+    } else {
+      // 如果找不到文件或URL，則執行原本的選擇邏輯
+      setSelectedProject(selectedProject === documentId ? null : documentId);
+    }
   };
 
   // 過濾當前顯示的文檔
@@ -150,33 +175,32 @@ export default function HandbookPage() {
           ) : (
             <div className="w-full">
               {/* 專案列表區域 */}
-              {projects.length > 0 && (
+              {filteredDocuments.length > 0 && (
                 <div className="mb-10">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">個案交屋手冊</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8 lg:gap-16">
-                    {projects.map((project) => (
+                    {filteredDocuments.map((doc) => (
                       <div 
-                        key={project.id} 
+                        key={doc.id} 
                         className={`cursor-pointer transition-all duration-200 ${
-                          selectedProject === project.id ? 'scale-105 shadow-lg' : 'hover:scale-105'
+                          selectedProject === doc.id ? 'scale-105 shadow-lg' : 'hover:scale-105'
                         }`}
-                        onClick={() => handleProjectSelect(project.id)}
+                        onClick={() => handleProjectSelect(doc.id)}
                       >
                         <ContentBlock 
                           TextClassName={`[&_h3]:text-center [&_h3]:text-black [&_h3]:text-sm [&_h3]:lg:text-xl ${
-                            selectedProject === project.id ? '[&_h3]:text-amber-800' : ''
+                            selectedProject === doc.id ? '[&_h3]:text-amber-800' : ''
                           }`}
                           ImageClassName="[&>div]:pt-[142%]"
                           layout="image-above-text"
-                          imageSrc={project.imageUrl}
-                          imageAlt={project.title}
-                          title1={project.title + '︱交屋手冊'}
+                          imageSrc={doc.imageUrl || doc.project?.imageUrl || ''}
+                          imageAlt={doc.title || doc.project?.title || ''}
+                          title1={doc.title + '︱交屋手冊' || doc.project?.title + '︱交屋手冊'}
                           text1={""}
                         />
                       </div>
                     ))}
                     {/* 動態填充至少顯示3個區塊 */}
-                    {Array.from({ length: Math.max(0, 3 - projects.length) }).map((_, index) => (
+                    {Array.from({ length: Math.max(0, 3 - filteredDocuments.length) }).map((_, index) => (
                       <div key={`empty-${index}`} className='mb-12'>
                         <div className="relative w-full pt-[142%] bg-[#b5aaa3]">
                           <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
@@ -188,79 +212,6 @@ export default function HandbookPage() {
                   </div>
                 </div>
               )}
-              
-              {/* 文檔列表區域 */}
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  {selectedProject 
-                    ? projects.find(p => p.id === selectedProject)?.title + ' 文件清單' 
-                    : '一般交屋文件'}
-                </h2>
-                
-                {filteredDocuments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
-                    <FileText className="h-12 w-12 text-gray-400 mb-2" />
-                    <p className="text-gray-500">暫無文件</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredDocuments.map((doc) => (
-                      <div key={doc.id} className="flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
-                        {/* 圖片區域 */}
-                        <div className="relative h-48 overflow-hidden">
-                          {doc.imageUrl ? (
-                            <img 
-                              src={doc.imageUrl} 
-                              alt={doc.title} 
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          ) : doc.project?.imageUrl ? (
-                            <img 
-                              src={doc.project.imageUrl} 
-                              alt={doc.project.title} 
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center w-full h-full bg-gray-100">
-                              {getDocumentIcon(doc.fileType)}
-                              <span className="ml-2 text-gray-500 font-medium">
-                                {doc.fileType.toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute top-2 right-2">
-                            <span className="px-2 py-1 rounded text-xs font-medium bg-white bg-opacity-90 text-gray-800">
-                              {doc.fileType.toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {/* 內容區域 */}
-                        <div className="p-4 flex-grow">
-                          <h3 className="font-medium text-gray-900 text-lg">{doc.title}</h3>
-                          {doc.description && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{doc.description}</p>
-                          )}
-                        </div>
-                        
-                        {/* 下載按鈕 */}
-                        <div className="p-4 pt-0 border-t border-gray-100">
-                          <a 
-                            href={doc.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center w-full py-2 px-4 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-md transition-colors"
-                            download
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            下載文件
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>

@@ -49,7 +49,7 @@ export default function Dashboard() {
     
     try {
       // 使用並行請求獲取所有數據
-      const [carouselRes, contactsRes, usersRes] = await Promise.all([
+      const [carouselRes, contactsRes, usersRes, documentsRes] = await Promise.all([
         // 獲取輪播數據
         fetch('/api/carousel/admin', {
           headers: { 'Cache-Control': 'no-cache' },
@@ -60,7 +60,10 @@ export default function Dashboard() {
         fetch('/api/contacts/admin').then(res => res.json()),
         
         // 獲取用戶數據
-        fetch('/api/users').then(res => res.json())
+        fetch('/api/users').then(res => res.json()),
+        
+        // 獲取交屋手冊文件數據
+        fetch('/api/documents/admin?category=handbook').then(res => res.json())
       ]);
       
       // 根據實際 API 回應格式計算輪播數量
@@ -77,6 +80,12 @@ export default function Dashboard() {
       const contactStats = contactsRes.statusStats || [];
       const newContactCount = contactStats.find((stat: any) => stat.status === 'new')?.count || 0;
       
+      // 計算交屋手冊數量
+      let documentCount = 0;
+      if (documentsRes.documents && Array.isArray(documentsRes.documents)) {
+        documentCount = documentsRes.documents.length;
+      }
+      
       // 更新數據
       setStats({
         carouselCount: carouselCount,
@@ -84,7 +93,7 @@ export default function Dashboard() {
         projectsNew: 4,
         projectsClassic: 6,
         projectsFuture: 2,
-        documentCount: 8, // 目前無API，使用模擬數據
+        documentCount: documentCount,
         contactCount: contactsRes.total || 0,
         newContactCount: Number(newContactCount),
         userCount: usersRes.data?.length || 0
