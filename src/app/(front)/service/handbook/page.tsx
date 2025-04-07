@@ -28,7 +28,8 @@ export default function HandbookPage() {
         const docsResponse = await fetch('/api/documents?category=handbook');
         
         if (!docsResponse.ok) {
-          throw new Error('無法獲取交屋手冊資訊');
+          const errorData = await docsResponse.json().catch(() => ({}));
+          throw new Error(errorData.details || errorData.error || '無法獲取交屋手冊資訊');
         }
         
         const docsData = await docsResponse.json();

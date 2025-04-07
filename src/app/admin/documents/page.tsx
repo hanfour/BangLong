@@ -136,7 +136,9 @@ export default function DocumentsPage() {
       });
       
       if (!response.ok) {
-        throw new Error(currentDocument ? '更新文檔失敗' : '創建文檔失敗');
+        const errorData = await response.json();
+        const errorMessage = errorData.details || errorData.error || (currentDocument ? '更新文檔失敗' : '創建文檔失敗');
+        throw new Error(errorMessage);
       }
       
       // 成功後刷新列表
@@ -144,7 +146,7 @@ export default function DocumentsPage() {
       handleCloseModal();
     } catch (err) {
       console.error('提交文檔失敗:', err);
-      setError('提交文檔失敗，請重試');
+      setError(err instanceof Error ? err.message : '提交文檔失敗，請重試');
     } finally {
       setIsSubmitting(false);
     }
