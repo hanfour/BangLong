@@ -157,29 +157,30 @@ export default function ContactsPage() {
   };
 
 
-  // 處理搜索狀態變更，使用防抖
-  useEffect(() => {
+  // 添加防抖版本的 fetchContacts
+  const debouncedFetchContacts = () => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     
     searchTimeoutRef.current = setTimeout(() => {
       fetchContacts();
-    }, 500);
+    }, 300);
+  };
+
+  // 過濾器變化時獲取數據
+  useEffect(() => {
+    if (sessionStatus === 'authenticated') {
+      // 使用防抖版本的 fetchContacts
+      debouncedFetchContacts();
+    }
     
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchTerm]);
-
-  // 過濾器變化時獲取數據
-  useEffect(() => {
-    if (sessionStatus === 'authenticated') {
-      fetchContacts();
-    }
-  }, [sessionStatus, statusFilter, startDate, endDate]);
+  }, [sessionStatus, statusFilter, startDate, endDate, showArchived, searchTerm]);
 
   // 獲取狀態標籤顏色
   const getStatusColor = (status: string) => {

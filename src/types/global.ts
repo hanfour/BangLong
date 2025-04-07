@@ -37,3 +37,21 @@ export type ProjectDetails = {
   description?: string; // 詳細描述
   additionalImages?: string[]; // 額外圖片
 };
+
+export type Document = {
+  id: string;
+  title: string;
+  description?: string;
+  fileUrl: string;
+  fileType: string; // pdf, docx 等
+  category: string; // 交屋手冊、售服流程等
+  order: number;
+  isActive: boolean;
+  projectId?: string;
+  project?: {
+    title: string;
+    imageUrl: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};

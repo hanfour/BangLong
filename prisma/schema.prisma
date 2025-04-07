@@ -33,16 +33,17 @@ model Carousel {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
-  description String?  @db.Text
-  category    String   // 新案鑑賞、歷年經典、未來計畫
+  description String?    @db.Text
+  category    String     // 新案鑑賞、歷年經典、未來計畫
   imageUrl    String
-  details     Json?    // 可儲存複雜的項目資訊
+  details     Json?      // 可儲存複雜的項目資訊
   order       Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean    @default(true)
+  documents   Document[] // 關聯的文件
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Document {
@@ -54,6 +55,8 @@ model Document {
   category    String   // 交屋手冊、售服流程等
   order       Int
   isActive    Boolean  @default(true)
+  projectId   String?  // 關聯到專案
+  project     Project? @relation(fields: [projectId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
