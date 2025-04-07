@@ -15,13 +15,13 @@ async function main() {
     },
     update: {
       value: 'G-TESTCODE123',
-      description: 'Google Analytics 4 測量 ID'
+      description: 'Google Analytics 4 ID'
     },
     create: {
       type: 'advanced',
       key: 'googleAnalytics',
       value: 'G-TESTCODE123',
-      description: 'Google Analytics 4 測量 ID'
+      description: 'Google Analytics 4 ID'
     }
   });
   

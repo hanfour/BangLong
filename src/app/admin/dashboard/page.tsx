@@ -63,13 +63,23 @@ export default function Dashboard() {
         fetch('/api/users').then(res => res.json())
       ]);
       
+      // 根據實際 API 回應格式計算輪播數量
+      let carouselCount = 0;
+      if (carouselRes.data && Array.isArray(carouselRes.data)) {
+        carouselCount = carouselRes.data.length;
+      } else if (carouselRes.items && Array.isArray(carouselRes.items)) {
+        carouselCount = carouselRes.items.length;
+      } else if (Array.isArray(carouselRes)) {
+        carouselCount = carouselRes.length;
+      }
+      
       // 計算新的聯絡表單數量
       const contactStats = contactsRes.statusStats || [];
       const newContactCount = contactStats.find((stat: any) => stat.status === 'new')?.count || 0;
       
       // 更新數據
       setStats({
-        carouselCount: carouselRes.data?.length || 0,
+        carouselCount: carouselCount,
         projectCount: 12, // 目前無API，使用模擬數據
         projectsNew: 4,
         projectsClassic: 6,

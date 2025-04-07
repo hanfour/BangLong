@@ -281,7 +281,7 @@ export default function SiteSettings() {
         notificationTemplate: '通知郵件模板（支持 {{name}}, {{email}}, {{phone}}, {{message}} 變量）'
       },
       advanced: {
-        googleAnalytics: 'Google Analytics 4 測量 ID (格式如 G-XXXXXXXXXX)',
+        googleAnalytics: 'Google Analytics 4 ID (格式如 G-XXXXXXXXXX)',
         headScripts: '插入到網頁 <head> 標籤中的自定義腳本代碼（如第三方分析工具）',
         bodyStartScripts: '插入到網頁 <body> 標籤開始處的自定義腳本代碼',
         bodyEndScripts: '插入到網頁 <body> 標籤結束處的自定義腳本代碼（如聊天插件等）'
@@ -689,7 +689,7 @@ export default function SiteSettings() {
               {/* Google Analytics 設定 */}
               <div>
                 <label htmlFor="ga_id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Google Analytics 4 測量 ID
+                  Google Analytics 4 ID
                 </label>
                 <input
                   id="ga_id"
@@ -699,7 +699,7 @@ export default function SiteSettings() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                   placeholder="G-XXXXXXXXXX"
                 />
-                <p className="mt-1 text-sm text-gray-500">輸入您的 Google Analytics 4 測量 ID，用於網站訪問數據分析</p>
+                <p className="mt-1 text-sm text-gray-500">輸入您的 Google Analytics 4 ID，用於網站訪問數據分析</p>
               </div>
               
               {/* Head 腳本 */}

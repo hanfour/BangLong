@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import {
   Loader2, MessageSquare, CheckCircle, Clock, XCircle, Send, Search,
-  Filter, Download, Calendar, RefreshCw, Mail, Phone, User, BarChart4
+  Filter, Download, Calendar, RefreshCw, Mail, Phone, User, BarChart4, Archive
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import TiptapEditor from '@/components/admin/TiptapEditor';
@@ -22,6 +22,7 @@ interface ContactSubmission {
   reply: string | null;
   createdAt: string;
   updatedAt: string;
+  archived: boolean;
 }
 
 // 定義統計數據類型
@@ -42,6 +43,7 @@ export default function ContactsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showArchived, setShowArchived] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -72,6 +74,7 @@ export default function ContactsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
+      params.append('archived', showArchived.toString());
       
       const url = `/api/contacts/admin?${params.toString()}`;
       const response = await fetch(url);
@@ -107,6 +110,52 @@ export default function ContactsPage() {
       setIsLoading(false);
     }
   };
+
+  const handleArchiveToggle = async (id: string, archive: boolean) => {
+    try {
+      setIsSubmitting(true);
+      setError('');
+      setSuccess('');
+      
+      const response = await fetch('/api/contacts/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, archived: archive }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(archive ? '封存失敗' : '解除封存失敗');
+      }
+      
+      // 更新本地狀態
+      setContacts(prev => 
+        prev.map(contact => 
+          contact.id === id ? { ...contact, archived: archive } : contact
+        )
+      );
+      
+      // 如果當前正在檢視該聯絡表單，也更新活動表單的狀態
+      if (activeContact && activeContact.id === id) {
+        setActiveContact(prev => prev ? { ...prev, archived: archive } : null);
+      }
+      
+      setSuccess(`已${archive ? '封存' : '解除封存'}此聯絡表單`);
+      
+      // 更新統計資料
+      fetchContacts();
+    } catch (err) {
+      console.error(archive ? '封存聯絡表單失敗:' : '解除封存聯絡表單失敗:', err);
+      setError(archive ? '封存聯絡表單失敗，請重試' : '解除封存聯絡表單失敗，請重試');
+    } finally {
+      setIsSubmitting(false);
+      
+      // 3秒後清除成功消息
+      setTimeout(() => {
+        setSuccess('');
+      }, 3000);
+    }
+  };
+
 
   // 處理搜索狀態變更，使用防抖
   useEffect(() => {
@@ -281,6 +330,7 @@ export default function ContactsPage() {
     setSearchTerm('');
     setStartDate('');
     setEndDate('');
+    setShowArchived(false);
     setShowFilters(false);
   };
 
@@ -474,6 +524,18 @@ export default function ContactsPage() {
                 <Filter className="h-4 w-4 mr-1" />
                 {showFilters ? '隱藏篩選' : '更多篩選'}
               </button>
+
+              <button
+                onClick={() => setShowArchived(!showArchived)}
+                className={`ml-2 inline-flex items-center px-3 py-2 border rounded-md text-sm leading-5 font-medium focus:outline-none focus:border-amber-300 focus:shadow-outline-amber ${
+                  showArchived 
+                    ? 'border-amber-500 bg-amber-50 text-amber-700' 
+                    : 'border-gray-300 bg-white text-gray-700 hover:text-gray-500'
+                }`}
+              >
+                <Archive className="h-4 w-4 mr-1" />
+                {showArchived ? '顯示中: 已封存' : '顯示封存'}
+              </button>
               
               <button
                 onClick={exportToCSV}
@@ -592,6 +654,11 @@ export default function ContactsPage() {
                       <h3 className="font-medium text-gray-900 flex items-center">
                         <User className="h-4 w-4 mr-1 text-gray-400" />
                         {contact.name}
+                        {contact.archived && (
+                          <span className="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">
+                            已封存
+                          </span>
+                        )}
                       </h3>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(contact.status)}`}>
                         {getStatusIcon(contact.status)}
@@ -628,6 +695,29 @@ export default function ContactsPage() {
               <div className="flex justify-between items-center p-4 border-b">
                 <h2 className="text-lg font-semibold text-gray-800">聯絡詳情</h2>
                 <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleArchiveToggle(activeContact.id, !activeContact.archived)}
+                    disabled={isSubmitting}
+                    className={`px-3 py-1 rounded-md text-sm flex items-center ${
+                      isSubmitting
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : activeContact.archived
+                          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {activeContact.archived ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        解除封存
+                      </>
+                    ) : (
+                      <>
+                        <Archive className="h-4 w-4 mr-1" />
+                        封存
+                      </>
+                    )}
+                  </button>
                   <button
                     onClick={() => handleStatusChange(activeContact.id, 'processing')}
                     disabled={activeContact.status === 'processing' || isSubmitting}

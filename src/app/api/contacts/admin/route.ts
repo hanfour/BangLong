@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { Archive } from 'lucide-react';
 
 // 獲取所有聯絡表單提交
 export async function GET(request: NextRequest) {
@@ -20,9 +21,13 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate') || undefined;
     const limit = Number(searchParams.get('limit')) || 100;
     const offset = Number(searchParams.get('offset')) || 0;
+    const showArchived = searchParams.get('archived') === 'true';
+
 
     // 構建查詢條件
-    let where: any = {};
+    let where: any = {
+      archived: showArchived // 根據封存狀態過濾
+    };
     
     // 狀態過濾
     if (status) {
@@ -111,7 +116,7 @@ export async function PATCH(request: NextRequest) {
     }
     
     const body = await request.json();
-    const { id, status, reply } = body;
+    const { id, status, reply, archived } = body;
     
     if (!id) {
       return NextResponse.json({ error: '缺少必要參數' }, { status: 400 });
@@ -132,6 +137,7 @@ export async function PATCH(request: NextRequest) {
       data: {
         ...(status && { status }),
         ...(reply !== undefined && { reply }),
+        ...(archived !== undefined && { archived }), // 處理封存狀態
         updatedAt: new Date(),
       },
     });
