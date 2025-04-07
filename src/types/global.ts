@@ -43,6 +43,7 @@ export type Document = {
   title: string;
   description?: string;
   fileUrl: string;
+  imageUrl?: string; // 封面圖片
   fileType: string; // pdf, docx 等
   category: string; // 交屋手冊、售服流程等
   order: number;

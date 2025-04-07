@@ -202,32 +202,60 @@ export default function HandbookPage() {
                     <p className="text-gray-500">暫無文件</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {filteredDocuments.map((doc) => (
-                      <a 
-                        key={doc.id}
-                        href={doc.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
-                        download
-                      >
-                        <div className="flex items-center">
-                          {getDocumentIcon(doc.fileType)}
-                          <div className="ml-3">
-                            <h3 className="font-medium text-gray-900">{doc.title}</h3>
-                            {doc.description && (
-                              <p className="text-sm text-gray-500 mt-1">{doc.description}</p>
-                            )}
+                      <div key={doc.id} className="flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
+                        {/* 圖片區域 */}
+                        <div className="relative h-48 overflow-hidden">
+                          {doc.imageUrl ? (
+                            <img 
+                              src={doc.imageUrl} 
+                              alt={doc.title} 
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          ) : doc.project?.imageUrl ? (
+                            <img 
+                              src={doc.project.imageUrl} 
+                              alt={doc.project.title} 
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center w-full h-full bg-gray-100">
+                              {getDocumentIcon(doc.fileType)}
+                              <span className="ml-2 text-gray-500 font-medium">
+                                {doc.fileType.toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="absolute top-2 right-2">
+                            <span className="px-2 py-1 rounded text-xs font-medium bg-white bg-opacity-90 text-gray-800">
+                              {doc.fileType.toUpperCase()}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center">
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800 mr-2">
-                            {doc.fileType.toUpperCase()}
-                          </span>
-                          <Download className="h-5 w-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                        
+                        {/* 內容區域 */}
+                        <div className="p-4 flex-grow">
+                          <h3 className="font-medium text-gray-900 text-lg">{doc.title}</h3>
+                          {doc.description && (
+                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{doc.description}</p>
+                          )}
                         </div>
-                      </a>
+                        
+                        {/* 下載按鈕 */}
+                        <div className="p-4 pt-0 border-t border-gray-100">
+                          <a 
+                            href={doc.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center w-full py-2 px-4 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-md transition-colors"
+                            download
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            下載文件
+                          </a>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}

@@ -24,6 +24,7 @@ export default function DocumentsPage() {
     title: '',
     description: '',
     fileUrl: '',
+    imageUrl: '',
     fileType: '',
     category: 'handbook', // 預設交屋手冊
     projectId: '',
@@ -34,8 +35,11 @@ export default function DocumentsPage() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+  const [imageToUpload, setImageToUpload] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
 
   // 檢查用戶是否已登錄
   useEffect(() => {
@@ -106,8 +110,14 @@ export default function DocumentsPage() {
 
       // 如果有文件要上傳，先上傳文件
       let finalFileUrl = formData.fileUrl;
+      let finalImageUrl = formData.imageUrl;
+      
       if (fileToUpload) {
-        finalFileUrl = await uploadFile(fileToUpload);
+        finalFileUrl = await uploadFile(fileToUpload, 'file');
+      }
+      
+      if (imageToUpload) {
+        finalImageUrl = await uploadFile(imageToUpload, 'image');
       }
       
       const method = currentDocument ? 'PATCH' : 'POST';
@@ -115,6 +125,7 @@ export default function DocumentsPage() {
       const body = {
         ...formData,
         fileUrl: finalFileUrl,
+        imageUrl: finalImageUrl,
         ...(currentDocument && { id: currentDocument.id })
       };
       
@@ -140,15 +151,23 @@ export default function DocumentsPage() {
   };
 
   // 上傳文件
-  const uploadFile = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(0);
+  const uploadFile = async (file: File, type: 'file' | 'image') => {
+    const isImg = type === 'image';
+    
+    if (isImg) {
+      setIsImageUploading(true);
+      setImageUploadProgress(0);
+    } else {
+      setIsUploading(true);
+      setUploadProgress(0);
+    }
     
     try {
       // 生成唯一的文件名
       const fileExt = file.name.split('.').pop();
       const randomName = Math.random().toString(36).substring(2, 15);
-      const filename = `document_${Date.now()}_${randomName}.${fileExt}`;
+      const prefix = isImg ? 'document_image' : 'document';
+      const filename = `${prefix}_${Date.now()}_${randomName}.${fileExt}`;
       
       // 創建 FormData
       const formData = new FormData();
@@ -161,7 +180,7 @@ export default function DocumentsPage() {
       });
       
       if (!response.ok) {
-        throw new Error('文件上傳失敗');
+        throw new Error(`${isImg ? '圖片' : '文件'}上傳失敗`);
       }
       
       const data = await response.json();
@@ -171,18 +190,23 @@ export default function DocumentsPage() {
         return data.url;
       } else if (data.fallback) {
         // 處理無法使用 Vercel Blob Storage 的情況
-        alert('Vercel Blob Storage 未設置，請手動提供文件URL');
-        return prompt('請輸入文件URL') || '';
+        alert('Vercel Blob Storage 未設置，請手動提供URL');
+        return prompt(`請輸入${isImg ? '圖片' : '文件'}URL`) || '';
       } else {
         throw new Error('未獲得有效的URL');
       }
     } catch (error) {
-      console.error('文件上傳失敗:', error);
-      setError('文件上傳失敗，請重試');
+      console.error(`${isImg ? '圖片' : '文件'}上傳失敗:`, error);
+      setError(`${isImg ? '圖片' : '文件'}上傳失敗，請重試`);
       return ''; // 返回空URL
     } finally {
-      setIsUploading(false);
-      setUploadProgress(100);
+      if (isImg) {
+        setIsImageUploading(false);
+        setImageUploadProgress(100);
+      } else {
+        setIsUploading(false);
+        setUploadProgress(100);
+      }
     }
   };
 
@@ -198,6 +222,13 @@ export default function DocumentsPage() {
         ...formData,
         fileType: fileExt
       });
+    }
+  };
+  
+  // 處理圖片選擇
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImageToUpload(e.target.files[0]);
     }
   };
 
@@ -237,6 +268,7 @@ export default function DocumentsPage() {
         title: document.title,
         description: document.description || '',
         fileUrl: document.fileUrl,
+        imageUrl: document.imageUrl || '',
         fileType: document.fileType,
         category: document.category,
         projectId: document.projectId || '',
@@ -249,6 +281,7 @@ export default function DocumentsPage() {
         title: '',
         description: '',
         fileUrl: '',
+        imageUrl: '',
         fileType: '',
         category: 'handbook',
         projectId: '',
@@ -258,6 +291,7 @@ export default function DocumentsPage() {
     }
     
     setFileToUpload(null);
+    setImageToUpload(null);
     setShowModal(true);
   };
 
@@ -266,6 +300,7 @@ export default function DocumentsPage() {
     setShowModal(false);
     setCurrentDocument(null);
     setFileToUpload(null);
+    setImageToUpload(null);
     setError('');
   };
 
@@ -430,7 +465,8 @@ export default function DocumentsPage() {
             <div className="bg-gray-50">
               <div className="grid grid-cols-12 gap-2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="col-span-1 flex items-center">編號</div>
-                <div className="col-span-3 flex items-center">標題</div>
+                <div className="col-span-1 flex items-center">圖片</div>
+                <div className="col-span-2 flex items-center">標題</div>
                 <div className="col-span-2 flex items-center">類別</div>
                 <div className="col-span-2 flex items-center">檔案類型</div>
                 <div className="col-span-2 flex items-center">專案</div>
@@ -444,10 +480,29 @@ export default function DocumentsPage() {
                   <div className="col-span-1 flex items-center">
                     {document.order}
                   </div>
-                  <div className="col-span-3 flex items-center">
+                  <div className="col-span-1 flex items-center">
+                    {document.imageUrl ? (
+                      <img 
+                        src={document.imageUrl} 
+                        alt={document.title} 
+                        className="h-10 w-10 object-cover rounded"
+                      />
+                    ) : document.project?.imageUrl ? (
+                      <img 
+                        src={document.project.imageUrl} 
+                        alt={document.project.title} 
+                        className="h-10 w-10 object-cover rounded opacity-50"
+                        title="使用專案圖片"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center">
+                        {getFileTypeIcon(document.fileType)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="col-span-2 flex items-center">
                     <div className="flex items-center">
-                      {getFileTypeIcon(document.fileType)}
-                      <span className="ml-2 font-medium text-gray-900">{document.title}</span>
+                      <span className="font-medium text-gray-900">{document.title}</span>
                     </div>
                   </div>
                   <div className="col-span-2 flex items-center">
@@ -607,6 +662,7 @@ export default function DocumentsPage() {
                       </select>
                     </div>
                     
+                    {/* 文件上傳 */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         文件 <span className="text-red-500">*</span>
@@ -683,6 +739,101 @@ export default function DocumentsPage() {
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* 封面圖片上傳 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        封面圖片
+                      </label>
+                      <div className="mt-1 flex items-center">
+                        <div className="flex-grow relative border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                          <div className="flex items-center">
+                            {imageToUpload ? (
+                              <>
+                                <File className="h-5 w-5 text-gray-400" />
+                                <span className="ml-2 text-gray-600 truncate">{imageToUpload.name}</span>
+                              </>
+                            ) : formData.imageUrl ? (
+                              <>
+                                <img 
+                                  src={formData.imageUrl} 
+                                  alt="封面圖片預覽" 
+                                  className="h-6 w-6 object-cover rounded mr-2" 
+                                />
+                                <a 
+                                  href={formData.imageUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 truncate flex-grow"
+                                >
+                                  {formData.imageUrl.split('/').pop()}
+                                </a>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">選擇封面圖片或輸入URL</span>
+                            )}
+                          </div>
+                        </div>
+                        <label
+                          htmlFor="image-upload"
+                          className="ml-2 cursor-pointer inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                        >
+                          <Upload className="h-4 w-4 mr-1" />
+                          瀏覽
+                        </label>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={handleImageChange}
+                        />
+                      </div>
+                      
+                      {/* 上傳進度條 */}
+                      {isImageUploading && (
+                        <div className="mt-2">
+                          <div className="bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-amber-600 h-2.5 rounded-full" 
+                              style={{ width: `${imageUploadProgress}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1 text-right">{imageUploadProgress}%</p>
+                        </div>
+                      )}
+                      
+                      {/* 手動輸入URL選項 */}
+                      <div className="mt-2">
+                        <label htmlFor="imageUrl" className="block text-xs font-medium text-gray-500">
+                          或直接輸入圖片URL
+                        </label>
+                        <div className="mt-1 flex rounded-md shadow-sm">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                            <Link className="h-4 w-4" />
+                          </span>
+                          <input
+                            type="text"
+                            id="imageUrl"
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                            className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 圖片預覽 */}
+                      {formData.imageUrl && (
+                        <div className="mt-2 flex justify-center">
+                          <img 
+                            src={formData.imageUrl} 
+                            alt="封面預覽" 
+                            className="h-32 object-contain border border-gray-200 rounded"
+                          />
+                        </div>
+                      )}
                     </div>
                     
                     <div>

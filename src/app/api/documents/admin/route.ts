@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json();
-    const { title, description, fileUrl, fileType, category, projectId, isActive } = body;
+    const { title, description, fileUrl, imageUrl, fileType, category, projectId, isActive } = body;
     
     // 驗證必填欄位
     if (!title || !fileUrl || !fileType || !category) {
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
         title,
         description: description || null,
         fileUrl,
+        imageUrl: imageUrl || null,
         fileType,
         category,
         projectId: projectId || null,
@@ -118,7 +119,7 @@ export async function PATCH(request: NextRequest) {
     }
     
     const body = await request.json();
-    const { id, title, description, fileUrl, fileType, category, projectId, order, isActive } = body;
+    const { id, title, description, fileUrl, imageUrl, fileType, category, projectId, order, isActive } = body;
     
     if (!id) {
       return NextResponse.json({ error: '缺少文檔ID' }, { status: 400 });
@@ -140,6 +141,7 @@ export async function PATCH(request: NextRequest) {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(fileUrl !== undefined && { fileUrl }),
+        ...(imageUrl !== undefined && { imageUrl }),
         ...(fileType !== undefined && { fileType }),
         ...(category !== undefined && { category }),
         ...(projectId !== undefined && { projectId }),

@@ -51,6 +51,7 @@ model Document {
   title       String
   description String?
   fileUrl     String
+  imageUrl    String?  // 封面圖片
   fileType    String   // pdf, docx 等
   category    String   // 交屋手冊、售服流程等
   order       Int
