@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Breadcrumb from '@/components/front/Breadcrumb';
 import ContentBlock from '@/components/front/ContentBlock';
 import { Document, Project } from '@/types/global';
-import { Loader2, Download, File, FileText, FileImage, FilePdf } from 'lucide-react';
+import { Loader2, File, FileText, FileImage } from 'lucide-react';
 
 interface ProjectWithDocuments extends Project {
   documents?: Document[];
@@ -87,7 +87,7 @@ export default function HandbookPage() {
     
     switch (type) {
       case 'pdf':
-        return <FilePdf className="h-5 w-5 text-red-600" />;
+        return <File className="h-5 w-5 text-red-600" />;
       case 'doc':
       case 'docx':
         return <FileText className="h-5 w-5 text-blue-600" />;

@@ -1,20 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, PlusCircle, EyeIcon, Edit, Trash2, AlertCircle, MoveVertical } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Project } from '@/types/global';
 
-export default function ProjectsPage() {
+function ProjectsContent({ categoryParam }: { categoryParam: string | null }) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get('category');
-  
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +34,6 @@ export default function ProjectsPage() {
     }
   }, [status, router, selectedCategory]);
 
-  // 當 URL 參數變更時更新選擇的類別
   useEffect(() => {
     if (categoryParam) {
       setSelectedCategory(categoryParam);
@@ -44,7 +42,6 @@ export default function ProjectsPage() {
     }
   }, [categoryParam]);
 
-  // 顯示成功提示後自動隱藏
   useEffect(() => {
     if (showSuccessMessage) {
       const timer = setTimeout(() => {
@@ -70,7 +67,6 @@ export default function ProjectsPage() {
 
       setProjects(data.projects || []);
       
-      // 如果處於重新排序模式，也更新排序數據
       if (isReordering) {
         setReorderProjects(data.projects || []);
       }
@@ -105,7 +101,6 @@ export default function ProjectsPage() {
         throw new Error(data.error || '刪除專案失敗');
       }
 
-      // 更新專案列表
       setProjects(projects.filter(project => project.id !== deleteId));
       setShowSuccessMessage('專案已成功刪除');
     } catch (error) {
@@ -131,7 +126,6 @@ export default function ProjectsPage() {
         throw new Error(data.error || '更新專案狀態失敗');
       }
 
-      // 更新專案列表
       setProjects(projects.map(project => 
         project.id === id ? { ...project, isActive: !currentStatus } : project
       ));
@@ -179,7 +173,6 @@ export default function ProjectsPage() {
         throw new Error(data.error || '儲存排序失敗');
       }
 
-      // 更新專案列表
       setProjects(data.projects || reorderProjects);
       setShowSuccessMessage('專案排序已更新');
     } catch (error) {
@@ -265,7 +258,6 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* 分類標籤 */}
       <div className="mb-6 flex overflow-x-auto pb-2">
         <Link
           href="/admin/projects"
@@ -293,7 +285,6 @@ export default function ProjectsPage() {
         </Link>
       </div>
 
-      {/* 成功訊息 */}
       {showSuccessMessage && (
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 animate-fade-in-out">
           <div className="flex items-center">
@@ -309,7 +300,6 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* 錯誤訊息 */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
           <div className="flex items-center">
@@ -464,8 +454,6 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
-
-      {/* 刪除確認對話框 */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden">
@@ -491,5 +479,27 @@ export default function ProjectsPage() {
         </div>
       )}
     </AdminLayout>
+  );
+}
+
+function SearchParamsWrapper() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
+  return <ProjectsContent categoryParam={categoryParam} />;
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-amber-800 mx-auto" />
+          <p className="mt-4 text-gray-600">載入中...</p>
+        </div>
+      </div>
+    }>
+      <SearchParamsWrapper />
+    </Suspense>
   );
 }
