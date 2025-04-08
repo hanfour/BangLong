@@ -20,30 +20,17 @@ export default function FutureProjectsPage() {
       setError(null);
 
       try {
-        // 實際環境中這裡會從 API 獲取數據
-        // const response = await fetch('/api/projects?category=future');
-        // const data = await response.json();
-        // setProjects(data.projects);
+        // 從 API 獲取未來計畫專案數據
+        const response = await fetch('/api/projects?category=future');
+        const data = await response.json();
         
-        // 目前使用假資料
-        const mockProjects: Project[] = [
-          {
-            id: 'future1',
-            title: '汐止．十五甲規劃案',
-            description: '',
-            category: 'future',
-            imageUrl: '/images/projects/project4.jpg',
-            details: {
-              items: []
-            },
-            order: 1,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-        ];
+        if (!response.ok) {
+          throw new Error(data.error || '獲取專案失敗');
+        }
         
-        setProjects(mockProjects);
+        // 只要已啟用的專案
+        const activeProjects = data.projects.filter((project: Project) => project.isActive);
+        setProjects(activeProjects);
       } catch (err) {
         console.error('Error fetching future projects:', err);
         setError('無法獲取未來計畫資訊，請稍後再試');

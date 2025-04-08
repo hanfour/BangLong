@@ -18,34 +18,17 @@ export default function NewProjectsPage() {
       setError(null);
 
       try {
-        // 實際環境中這裡會從 API 獲取數據
-        // const response = await fetch('/api/projects?category=new');
-        // const data = await response.json();
-        // setProjects(data.projects);
+        // 從 API 獲取新案專案數據
+        const response = await fetch('/api/projects?category=new');
+        const data = await response.json();
         
-        // 目前使用假資料
-        const mockProjects: Project[] = [
-          {
-            id: 'project1',
-            title: '邦瓏雍玥',
-            description: '',
-            category: 'new',
-            imageUrl: '/images/projects/project1.jpg',
-            details: {
-              items: [
-                { label: '', value: '新莊區合鳳段︱129、133、134地號' },
-                { label: '基地坪數', value: '1436坪' },
-                { label: '樓層規劃', value: '23F、24F／B6' },
-              ]
-            },
-            order: 1,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-        ];
+        if (!response.ok) {
+          throw new Error(data.error || '獲取專案失敗');
+        }
         
-        setProjects(mockProjects);
+        // 只要已啟用的專案
+        const activeProjects = data.projects.filter((project: Project) => project.isActive);
+        setProjects(activeProjects);
       } catch (err) {
         console.error('Error fetching new projects:', err);
         setError('無法獲取建案資訊，請稍後再試');
@@ -78,7 +61,7 @@ export default function NewProjectsPage() {
             parentTitleEn="ARCH" 
             currentTitle="新案鑑賞" 
             parentPath="/arch"
-          parentIsClickable={false}
+            parentIsClickable={false}
           />
         </div>
         

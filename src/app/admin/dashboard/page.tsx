@@ -49,7 +49,7 @@ export default function Dashboard() {
     
     try {
       // 使用並行請求獲取所有數據
-      const [carouselRes, contactsRes, usersRes, documentsRes] = await Promise.all([
+      const [carouselRes, contactsRes, usersRes, documentsRes, projectsRes, projectsNewRes, projectsClassicRes, projectsFutureRes] = await Promise.all([
         // 獲取輪播數據
         fetch('/api/carousel/admin', {
           headers: { 'Cache-Control': 'no-cache' },
@@ -63,7 +63,19 @@ export default function Dashboard() {
         fetch('/api/users').then(res => res.json()),
         
         // 獲取交屋手冊文件數據
-        fetch('/api/documents/admin?category=handbook').then(res => res.json())
+        fetch('/api/documents/admin?category=handbook').then(res => res.json()),
+
+        // 獲取所有專案數據
+        fetch('/api/projects/admin').then(res => res.json()),
+
+        // 獲取新案專案數據
+        fetch('/api/projects/admin?category=new').then(res => res.json()),
+        
+        // 獲取經典專案數據
+        fetch('/api/projects/admin?category=classic').then(res => res.json()),
+        
+        // 獲取未來專案數據
+        fetch('/api/projects/admin?category=future').then(res => res.json())
       ]);
       
       // 根據實際 API 回應格式計算輪播數量
@@ -87,14 +99,38 @@ export default function Dashboard() {
       if (documentsRes.documents && Array.isArray(documentsRes.documents)) {
         documentCount = documentsRes.documents.length;
       }
+
+      // 計算專案數量
+      let projectCount = 0;
+      if (projectsRes.projects && Array.isArray(projectsRes.projects)) {
+        projectCount = projectsRes.projects.length;
+      }
+
+      // 計算新案專案數量
+      let projectsNew = 0;
+      if (projectsNewRes.projects && Array.isArray(projectsNewRes.projects)) {
+        projectsNew = projectsNewRes.projects.length;
+      }
+
+      // 計算經典專案數量
+      let projectsClassic = 0;
+      if (projectsClassicRes.projects && Array.isArray(projectsClassicRes.projects)) {
+        projectsClassic = projectsClassicRes.projects.length;
+      }
+
+      // 計算未來專案數量
+      let projectsFuture = 0;
+      if (projectsFutureRes.projects && Array.isArray(projectsFutureRes.projects)) {
+        projectsFuture = projectsFutureRes.projects.length;
+      }
       
       // 更新數據
       setStats({
         carouselCount: carouselCount,
-        projectCount: 12, // 目前無API，使用模擬數據
-        projectsNew: 4,
-        projectsClassic: 6,
-        projectsFuture: 2,
+        projectCount: projectCount,
+        projectsNew: projectsNew,
+        projectsClassic: projectsClassic,
+        projectsFuture: projectsFuture,
         documentCount: documentCount,
         contactCount: contactsRes.total || 0,
         newContactCount: Number(newContactCount),
