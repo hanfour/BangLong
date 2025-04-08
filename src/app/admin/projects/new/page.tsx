@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, FormEvent, useCallback } from 'react';
+import { Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, X, Plus, AlertCircle } from 'lucide-react';
@@ -18,12 +19,10 @@ type FormData = {
   isActive: boolean;
 };
 
-export default function NewProjectPage() {
+function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic' | 'future' | null }) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get('category') as 'new' | 'classic' | 'future' | null;
-  
+
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -45,7 +44,6 @@ export default function NewProjectPage() {
     }
   }, [status, router]);
 
-  // 更新類別
   useEffect(() => {
     if (categoryParam) {
       setFormData(prev => ({ ...prev, category: categoryParam }));
@@ -100,19 +98,17 @@ export default function NewProjectPage() {
       setIsUploadingImage(true);
       setImageUploadError(null);
 
-      // 生成唯一的檔案名稱
       const timestamp = new Date().getTime();
       const fileExt = file.name.split('.').pop() || 'jpg';
       const safeFileName = `project-image-${timestamp}.${fileExt}`;
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('type', 'projects');
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'projects');
 
-      // 添加檔案名稱作為 URL 參數
       const response = await fetch(`/api/upload?filename=${encodeURIComponent(safeFileName)}`, {
         method: 'POST',
-        body: formData,
+        body: formDataUpload,
       });
 
       const data = await response.json();
@@ -121,7 +117,6 @@ export default function NewProjectPage() {
         throw new Error(data.error || '上傳圖片失敗');
       }
 
-      // 使用 Vercel Blob 返回的 URL
       setFormData(prev => ({ ...prev, imageUrl: data.url }));
       setImagePreview(data.url);
     } catch (error) {
@@ -137,7 +132,6 @@ export default function NewProjectPage() {
     setIsSubmitting(true);
     setError(null);
 
-    // 處理表單驗證
     if (!formData.title.trim()) {
       setError('請輸入專案標題');
       setIsSubmitting(false);
@@ -150,7 +144,6 @@ export default function NewProjectPage() {
       return;
     }
 
-    // 空的詳細信息將被移除
     const filteredDetailItems = formData.detailItems.filter(item => 
       item.label.trim() !== '' || item.value.trim() !== ''
     );
@@ -164,9 +157,7 @@ export default function NewProjectPage() {
           description: formData.description.trim() || null,
           category: formData.category,
           imageUrl: formData.imageUrl,
-          details: { 
-            items: filteredDetailItems
-          },
+          details: { items: filteredDetailItems },
           isActive: formData.isActive
         })
       });
@@ -177,7 +168,6 @@ export default function NewProjectPage() {
         throw new Error(data.error || '創建專案失敗');
       }
 
-      // 成功後導向到專案列表
       router.push(`/admin/projects?category=${formData.category}`);
     } catch (error) {
       console.error('創建專案失敗:', error);
@@ -225,7 +215,6 @@ export default function NewProjectPage() {
         </div>
       </div>
 
-      {/* 錯誤訊息 */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
           <div className="flex items-center">
@@ -238,7 +227,6 @@ export default function NewProjectPage() {
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 左側基本信息 */}
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -354,7 +342,6 @@ export default function NewProjectPage() {
               </div>
             </div>
 
-            {/* 右側詳細信息 */}
             <div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -419,7 +406,7 @@ export default function NewProjectPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
                     <span>處理中...</span>
                   </>
                 ) : (
@@ -431,5 +418,27 @@ export default function NewProjectPage() {
         </form>
       </div>
     </AdminLayout>
+  );
+}
+
+function SearchParamsWrapper() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category') as 'new' | 'classic' | 'future' | null;
+
+  return <NewProjectContent categoryParam={categoryParam} />;
+}
+
+export default function NewProjectPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-amber-800 mx-auto" />
+          <p className="mt-4 text-gray-600">載入中...</p>
+        </div>
+      </div>
+    }>
+      <SearchParamsWrapper />
+    </Suspense>
   );
 }
