@@ -689,7 +689,7 @@ export default function DocumentsPage() {
                         文件 <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-1 flex items-stretch">
-                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 max-w-[80%]">
+                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 w-[65%]">
                           <div className="flex items-center">
                             {fileToUpload ? (
                               <>
@@ -768,7 +768,7 @@ export default function DocumentsPage() {
                         封面圖片
                       </label>
                       <div className="mt-1 flex items-stretch">
-                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 max-w-[80%]">
+                        <div className="flex-grow relative border border-gray-300 rounded-md py-2 px-3 w-[65%]">
                           <div className="flex items-center">
                             {imageToUpload ? (
                               <>

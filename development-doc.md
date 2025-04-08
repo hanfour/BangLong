@@ -303,7 +303,7 @@ npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
 已創建的管理員帳戶信息：
 - **電子郵件**: hanfourhuang@gmail.com
-- **密碼**: Bang1ong@2025
+- **密碼**: BAng1ong@test
 
 ## 前端路由
 

@@ -248,7 +248,7 @@ export default function UsersPage() {
           <ShieldAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-red-800 mb-2">訪問被拒絕</h3>
           <p className="text-red-600">
-            您沒有權限訪問用戶管理頁面。此功能僅對管理員開放。
+            您沒有權限訪問帳戶管理頁面。此功能僅對管理員開放。
           </p>
         </div>
       </AdminLayout>
@@ -261,7 +261,7 @@ export default function UsersPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center">
             <Users className="mr-2 h-6 w-6" />
-            用戶管理
+            帳戶管理
           </h1>
           <p className="text-gray-600 mt-1">管理系統用戶賬戶、角色和權限</p>
         </div>
@@ -452,7 +452,7 @@ export default function UsersPage() {
                       id="name"
                       value={newUser.name}
                       onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="用戶姓名"
                       required
                     />
@@ -471,7 +471,7 @@ export default function UsersPage() {
                       id="email"
                       value={newUser.email}
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
                       required
                     />
@@ -490,7 +490,7 @@ export default function UsersPage() {
                       id="password"
                       value={newUser.password}
                       onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                      className="py-4 pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="至少6個字元"
                       minLength={6}
                       required
@@ -505,13 +505,13 @@ export default function UsersPage() {
                     id="role"
                     value={newUser.role}
                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'admin' | 'editor' })}
-                    className="mt-1 py-4 pl-4 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                    className="mt-1 py-2 pl-4 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                   >
                     <option value="editor">編輯者</option>
                     <option value="admin">管理員</option>
                   </select>
                   <p className="mt-1 text-[10px] text-gray-500">
-                    *管理員可以管理所有功能，包括用戶管理。<br/>*編輯者只能管理內容。
+                    *管理員可以管理所有功能，包括帳戶管理。<br/>*編輯者只能管理內容。
                   </p>
                 </div>
               </div>
@@ -574,7 +574,7 @@ export default function UsersPage() {
                       id="edit-name"
                       value={editUser.name}
                       onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="用戶姓名"
                       required
                     />
@@ -593,7 +593,7 @@ export default function UsersPage() {
                       id="edit-email"
                       value={editUser.email}
                       onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
-                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
                       required
                     />
@@ -612,7 +612,7 @@ export default function UsersPage() {
                       id="edit-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                      className="pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="留空表示不變更密碼"
                       minLength={6}
                     />
@@ -626,7 +626,7 @@ export default function UsersPage() {
                     id="edit-role"
                     value={editUser.role}
                     onChange={(e) => setEditUser({ ...editUser, role: e.target.value as 'admin' | 'editor' })}
-                    className="mt-1 block w-full rounded-md border-gray-300 focus:ring-amber-500 focus:border-amber-500"
+                    className="mt-1 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                   >
                     <option value="editor">編輯者</option>
                     <option value="admin">管理員</option>

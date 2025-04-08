@@ -72,6 +72,8 @@ export default function Dashboard() {
         carouselCount = carouselRes.data.length;
       } else if (carouselRes.items && Array.isArray(carouselRes.items)) {
         carouselCount = carouselRes.items.length;
+      } else if (carouselRes.carouselItems && Array.isArray(carouselRes.carouselItems)) {
+        carouselCount = carouselRes.carouselItems.length;
       } else if (Array.isArray(carouselRes)) {
         carouselCount = carouselRes.length;
       }

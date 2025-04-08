@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon, Lock } from 'lucide-react';
 import Image from 'next/image';
 import TiptapEditor from '@/components/admin/TiptapEditor';
 
@@ -22,6 +22,54 @@ export default function SiteSettings() {
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState('seo');
+
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
+  const handleChangePassword = async () => {
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setPasswordError('請填寫所有欄位');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('新密碼與確認密碼不一致');
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const res = await fetch('/api/users/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setPasswordError(data.error || '密碼變更失敗');
+      } else {
+        setPasswordSuccess('密碼已成功變更');
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error) {
+      console.error(error);
+      setPasswordError('發生錯誤，請稍後再試');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -762,6 +810,7 @@ export default function SiteSettings() {
             </div>
           </div>
         )}
+
       </div>
     </AdminLayout>
   );
