@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         role: true,
         createdAt: true,
         updatedAt: true,
+        hasChangedPassword: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -57,6 +58,8 @@ export async function GET(request: NextRequest) {
 // 創建新用戶
 export async function POST(request: NextRequest) {
   try {
+    const crypto = await import('crypto');
+
     // 檢查用戶是否已認證並具有管理員權限
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, role } = validationResult.data;
+    const { name, email, role } = validationResult.data;
 
     // 檢查郵箱是否已存在
     const existingUser = await prisma.user.findUnique({
@@ -88,8 +91,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 加密密碼
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 產生亂數密碼
+    const randomPassword = crypto.randomBytes(8).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    // 產生重設密碼 token 與過期時間
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小時
 
     // 創建用戶
     const newUser = await prisma.user.create({
@@ -98,6 +106,9 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         role,
+        hasChangedPassword: false,
+        resetToken,
+        resetTokenExpiry,
       },
       select: {
         id: true,
@@ -108,8 +119,31 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // 發送邀請信
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL}/api/sendEmail`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: '邀請您加入平台',
+          body: `
+            <p>您好 ${name}，</p>
+            <p>您已被邀請加入平台，請點擊以下連結設定您的密碼：</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/reset-password?email=${encodeURIComponent(email)}&token=${resetToken}">設定密碼</a></p>
+            <p>此連結24小時內有效。</p>
+            <p>如果您未申請此帳號，請忽略此郵件。</p>
+          `,
+          captcha: 'system',
+          captchaId: 'system',
+          to: email,
+        }),
+      });
+    } catch (emailError) {
+      console.error('寄送邀請信失敗:', emailError);
+    }
+
     return NextResponse.json({
-      message: '用戶創建成功',
+      message: '用戶創建成功，邀請信已寄出',
       data: newUser,
     });
   } catch (error) {

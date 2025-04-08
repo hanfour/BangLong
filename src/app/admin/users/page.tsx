@@ -18,6 +18,7 @@ interface User {
   role: 'admin' | 'editor';
   createdAt: string;
   updatedAt: string;
+  hasChangedPassword: boolean;
 }
 
 export default function UsersPage() {
@@ -347,6 +348,9 @@ export default function UsersPage() {
                     角色
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    密碼狀態
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     創建時間
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -373,6 +377,13 @@ export default function UsersPage() {
                         user.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                       }`}>
                         {user.role === 'admin' ? '管理員' : '編輯者'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.hasChangedPassword ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user.hasChangedPassword ? '已修改' : '未修改'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -473,26 +484,6 @@ export default function UsersPage() {
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                       className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    密碼
-                  </label>
-                  <div className="mt-1 relative rounded-md">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Key className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      id="password"
-                      value={newUser.password}
-                      onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                      className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
-                      placeholder="至少6個字元"
-                      minLength={6}
                       required
                     />
                   </div>
