@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -257,6 +258,16 @@ function ProjectsContent({ categoryParam }: { categoryParam: string | null }) {
           )}
         </div>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 點擊「新增專案」按鈕，填寫專案資料後儲存。
+2. 可依分類篩選專案，快速查看不同類型。
+3. 點擊專案右側「編輯」圖示可修改專案資料。
+4. 點擊「刪除」圖示可刪除專案。
+5. 點擊「調整排序」可拖曳專案順序，完成後點「儲存排序」。
+`}
+      />
 
       <div className="mb-6 flex overflow-x-auto pb-2">
         <Link

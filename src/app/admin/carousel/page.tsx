@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -152,6 +153,16 @@ export default function CarouselManagement() {
           新增輪播
         </Link>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 點擊「新增輪播」按鈕，填寫標題、連結、上傳圖片，儲存後即加入首頁輪播。
+2. 點擊輪播右側「編輯」圖示可修改內容。
+3. 點擊「刪除」圖示可刪除輪播圖。
+4. 使用上下箭頭調整輪播圖顯示順序。
+5. 點擊「啟用中/已停用」切換輪播圖顯示狀態。
+`}
+      />
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import {
   Loader2, File, Plus, Pencil, Trash2, Search, Check, X,
@@ -386,6 +387,16 @@ export default function DocumentsPage() {
         </h1>
         <p className="text-gray-600 mt-1">管理交屋手冊、說明文件等</p>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 點擊「新增文檔」按鈕，填寫標題、描述，選擇類別，關聯專案，並上傳檔案與封面圖片。
+2. 支援上傳檔案或直接輸入檔案/圖片 URL。
+3. 點擊文檔右側「編輯」圖示可修改內容。
+4. 點擊「刪除」圖示可刪除文檔。
+5. 可使用搜尋與類別篩選快速查找文件。
+`}
+      />
 
       {/* 錯誤訊息 */}
       {error && (

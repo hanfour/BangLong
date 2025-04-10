@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import {
@@ -274,6 +275,16 @@ export default function UsersPage() {
           添加用戶
         </button>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 點擊「添加用戶」按鈕，輸入姓名、電子郵件、密碼，選擇角色，點擊「創建用戶」。
+2. 搜尋框可輸入姓名、郵箱或角色快速篩選用戶。
+3. 點擊用戶右側的「編輯」圖示可修改用戶資料或重設密碼。
+4. 點擊「刪除」圖示可刪除用戶（無法刪除自己）。
+5. 密碼至少6碼，管理員可管理所有功能，編輯者僅能管理內容。
+`}
+      />
 
       {/* 成功和錯誤消息 */}
       {error && (

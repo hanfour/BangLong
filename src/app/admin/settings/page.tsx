@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import { Loader2, Save, Settings, Mail, Search, AlertCircle, X, Check, Info, Upload, Image as ImageIcon, Lock } from 'lucide-react';
 import Image from 'next/image';
@@ -377,6 +378,18 @@ export default function SiteSettings() {
           )}
         </button>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 可切換「SEO設定」、「郵件設定」、「進階設定」分頁進行編輯。
+2. SEO設定：填寫網站標題、描述、關鍵字，設定社群分享圖片與文字。
+3. 郵件設定：設定通知信收件者，編輯通知信模板。
+4. 進階設定：填寫 GA4 ID，嵌入自訂腳本。
+5. 可上傳社群分享圖片，或輸入圖片 URL。
+6. 修改完成後，點擊右上角「保存設定」按鈕儲存。
+7. 下方可變更管理員密碼，請輸入舊密碼與新密碼。
+`}
+      />
       
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">

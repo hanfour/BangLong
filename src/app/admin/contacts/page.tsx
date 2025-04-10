@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import { format, set } from 'date-fns';
 import {
@@ -408,6 +409,17 @@ export default function ContactsPage() {
         </h1>
         <p className="text-gray-600 mt-1">管理和回覆客戶提交的聯絡表單</p>
       </div>
+
+      <AdminHelp
+        content={`【操作說明】
+1. 左側列表可點擊查看客戶留言詳情。
+2. 可使用搜尋、篩選、日期區間快速查找聯絡紀錄。
+3. 在詳情區輸入回覆內容，點擊「送出回覆」即會寄送郵件給客戶。
+4. 可標記聯絡狀態為「處理中」或「已完成」。
+5. 可封存或解除封存聯絡紀錄，封存後不影響資料保存。
+6. 點擊「導出」可下載聯絡資料 CSV 檔。
+`}
+      />
       
       {/* 成功和錯誤訊息 */}
       {error && (

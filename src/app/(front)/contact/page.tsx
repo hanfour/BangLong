@@ -31,12 +31,13 @@ export default function ContactPage() {
   const [captchaText, setCaptchaText] = useState(''); // 儲存驗證碼文字
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ContactFormData>({
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+  reset,
+  watch,
+} = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
       name: '',
@@ -64,26 +65,54 @@ export default function ContactPage() {
           // 儲存驗證碼文字供本地驗證使用
           setCaptchaText(data.captchaText);
           
-          const canvas = document.createElement('canvas');
-          canvas.width = 100;
-          canvas.height = 50;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            // 設置背景
-            ctx.fillStyle = '#f5f5f5';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 添加數字
-            ctx.font = 'bold 20px Arial';
-            ctx.fillStyle = '#333';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            for (let i = 0; i < data.captchaText.length; i++) {
-              ctx.fillText(data.captchaText[i], 20 + i * 20, 25);
-            }
-            
-            setCaptchaImage(canvas.toDataURL('image/png'));
-          }
+const canvas = document.createElement('canvas');
+canvas.width = 100;
+canvas.height = 50;
+const ctx = canvas.getContext('2d');
+if (ctx) {
+  // 設置背景
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 加入干擾線條
+  for (let i = 0; i < 5; i++) {
+    ctx.strokeStyle = `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0.7)`;
+    ctx.beginPath();
+    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.stroke();
+  }
+
+  // 加入雜訊點
+  for (let i = 0; i < 30; i++) {
+    ctx.fillStyle = `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0.7)`;
+    ctx.beginPath();
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    ctx.arc(x, y, 1, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  ctx.font = 'bold 20px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // 畫每個字，隨機旋轉
+  for (let i = 0; i < data.captchaText.length; i++) {
+    const char = data.captchaText[i];
+    const x = 20 + i * 20;
+    const y = 25;
+    const angle = (Math.random() - 0.5) * 0.7; // -0.35 ~ +0.35 弧度
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.fillStyle = `rgb(${Math.floor(Math.random()*150)},${Math.floor(Math.random()*150)},${Math.floor(Math.random()*150)})`;
+    ctx.fillText(char, 0, 0);
+    ctx.restore();
+  }
+
+  setCaptchaImage(canvas.toDataURL('image/png'));
+}
         } else if (data.captchaImage) {
           setCaptchaImage(data.captchaImage);
         }
@@ -333,14 +362,17 @@ export default function ContactPage() {
               <label className="!hidden text-[#40220f] mb-2 font-medium" htmlFor="message">
                 留言內容 <span className="text-red-500">*</span>
               </label>
-              <textarea
-                id="message"
-                {...register('message')}
-                rows={5}
-                className="w-full px-4 py-3 border border-[#a48b78] bg-white focus:outline-none focus:ring-.5 focus:ring-[#40220f] focus:border-[#40220f] transition-colors"
-                placeholder="請輸入您的留言內容"
-              ></textarea>
-              {errors.message && <p className="mt-1 text-red-500 text-sm">{errors.message.message}</p>}
+<textarea
+  id="message"
+  {...register('message')}
+  rows={5}
+  className="w-full px-4 py-3 border border-[#a48b78] bg-white focus:outline-none focus:ring-.5 focus:ring-[#40220f] focus:border-[#40220f] transition-colors"
+  placeholder="請輸入至少10字的留言內容"
+></textarea>
+<p className={`mt-1 text-sm ${watch('message') && watch('message').length < 10 ? 'text-red-500' : 'text-gray-500'}`}>
+  目前字數：{watch('message') ? watch('message').length : 0} / 最少10字
+</p>
+{errors.message && <p className="mt-1 text-red-500 text-sm">{errors.message.message}</p>}
             </div>
 
             <div className="space-y-4">

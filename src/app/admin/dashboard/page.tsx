@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import AdminHelp from '@/components/admin/AdminHelp';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -161,6 +162,8 @@ export default function Dashboard() {
         <h1 className="text-2xl font-bold text-gray-800">儀表板總覽</h1>
         <p className="text-gray-600 mt-1">歡迎回來，{session?.user?.name || '管理員'}！查看網站最新數據。</p>
       </div>
+
+      
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
