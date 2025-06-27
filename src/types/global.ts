@@ -18,12 +18,19 @@ export type Project = {
   title: string;
   description?: string;
   category: 'new' | 'classic' | 'future'; // 新案鑑賞、歷年經典、未來計畫
-  imageUrl: string;
   details?: ProjectDetails;
   order: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  images: ProjectImage[];
+};
+
+export type ProjectImage = {
+  id: string;
+  imageUrl: string;
+  order: number;
+  projectId: string;
 };
 
 export type ProjectDetailItem = {
@@ -51,7 +58,7 @@ export type Document = {
   projectId?: string;
   project?: {
     title: string;
-    imageUrl: string;
+    images: { imageUrl: string }[];
   };
   createdAt: Date;
   updatedAt: Date;

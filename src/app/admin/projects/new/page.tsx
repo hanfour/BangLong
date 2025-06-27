@@ -8,13 +8,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, X, Plus, AlertCircle } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { ProjectDetailItem } from '@/types/global';
+import ImageUploader from '@/components/admin/ImageUploader';
+import { ProjectDetailItem, ProjectImage } from '@/types/global';
 
 type FormData = {
   title: string;
   description: string;
   category: 'new' | 'classic' | 'future';
-  imageUrl: string;
+  images: ProjectImage[];
   detailItems: ProjectDetailItem[];
   isActive: boolean;
 };
@@ -27,16 +28,13 @@ function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic'
     title: '',
     description: '',
     category: categoryParam || 'new',
-    imageUrl: '',
+    images: [],
     detailItems: [{ label: '', value: '' }],
     isActive: true
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -79,53 +77,6 @@ function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic'
     setFormData(prev => ({ ...prev, detailItems: updatedItems }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      setImageUploadError('請上傳 JPG、PNG 或 WebP 格式的圖片');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setImageUploadError('圖片大小不能超過 5MB');
-      return;
-    }
-
-    try {
-      setIsUploadingImage(true);
-      setImageUploadError(null);
-
-      const timestamp = new Date().getTime();
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const safeFileName = `project-image-${timestamp}.${fileExt}`;
-
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'projects');
-
-      const response = await fetch(`/api/upload?filename=${encodeURIComponent(safeFileName)}`, {
-        method: 'POST',
-        body: formDataUpload,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || '上傳圖片失敗');
-      }
-
-      setFormData(prev => ({ ...prev, imageUrl: data.url }));
-      setImagePreview(data.url);
-    } catch (error) {
-      console.error('上傳圖片失敗:', error);
-      setImageUploadError('上傳圖片失敗，請稍後再試');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -138,13 +89,13 @@ function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic'
       return;
     }
 
-    if (!formData.imageUrl) {
-      setError('請上傳專案圖片');
+    if (formData.images.length === 0) {
+      setError('請至少上傳一張專案圖片');
       setIsSubmitting(false);
       return;
     }
 
-    const filteredDetailItems = formData.detailItems.filter(item => 
+    const filteredDetailItems = formData.detailItems.filter(item =>
       item.label.trim() !== '' || item.value.trim() !== ''
     );
 
@@ -156,7 +107,7 @@ function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic'
           title: formData.title.trim(),
           description: formData.description.trim() || null,
           category: formData.category,
-          imageUrl: formData.imageUrl,
+          images: formData.images,
           details: { items: filteredDetailItems },
           isActive: formData.isActive
         })
@@ -272,60 +223,10 @@ function NewProjectContent({ categoryParam }: { categoryParam: 'new' | 'classic'
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  專案圖片 <span className="text-red-500">*</span>
-                </label>
-                <div className="border border-dashed border-gray-300 rounded-md p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center">
-                      {imagePreview ? (
-                        <div className="relative w-full max-w-md h-40">
-                          <Image
-                            src={imagePreview}
-                            alt="Project preview"
-                            fill
-                            className="object-contain"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setImagePreview(null);
-                              setFormData(prev => ({ ...prev, imageUrl: '' }));
-                            }}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-amber-800 rounded-md shadow-sm tracking-wide cursor-pointer hover:bg-amber-50 border border-amber-800">
-                          <span className="mt-2 text-base leading-normal">選擇圖片</span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            disabled={isUploadingImage}
-                          />
-                        </label>
-                      )}
-                    </div>
-                    {isUploadingImage && (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 animate-spin text-amber-800" />
-                        <span className="ml-2 text-sm text-gray-500">上傳中...</span>
-                      </div>
-                    )}
-                    {imageUploadError && (
-                      <p className="text-red-600 text-sm">{imageUploadError}</p>
-                    )}
-                    <p className="text-xs text-gray-500 text-center">
-                      支援 JPG、PNG 和 WebP 格式的圖片，最大大小 5MB
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ImageUploader
+                images={formData.images}
+                onImagesChange={(newImages) => setFormData(prev => ({ ...prev, images: newImages }))}
+              />
 
               <div className="flex items-center">
                 <input

@@ -383,14 +383,18 @@ function ProjectsContent({ categoryParam }: { categoryParam: string | null }) {
                       </td>
                     )}
                     <td className="px-3 py-4 whitespace-nowrap">
-                      <div className="w-16 h-12 relative">
-                        <Image
-                          src={project.imageUrl}
-                          alt={project.title}
-                          fill
-                          sizes="64px"
-                          className="object-cover rounded-sm"
-                        />
+                      <div className="w-16 h-12 relative bg-gray-100 rounded-sm flex items-center justify-center">
+                        {project.images && project.images.length > 0 ? (
+                          <Image
+                            src={project.images[0].imageUrl}
+                            alt={project.title}
+                            fill
+                            sizes="64px"
+                            className="object-cover rounded-sm"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-400">無圖</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 max-w-xs truncate">

@@ -83,10 +83,10 @@ export default function FutureProjectsPage() {
               {/* 垂直排列的未來計畫項目列表 */}
               <div className="space-y-12">
                 {projects.map((project) => (
-                  <ContentBlock 
-                    key={project.id} 
+                  <ContentBlock
+                    key={project.id}
                     layout="image-left-text"
-                    imageSrc={project.imageUrl}
+                    imageSrc={project.images && project.images.length > 0 ? project.images[0].imageUrl : '/images/placeholder.jpg'}
                     imageAlt={project.title}
                     title1={project.title}
                     text1={project.description}

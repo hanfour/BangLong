@@ -513,24 +513,24 @@ export default function DocumentsPage() {
                     {document.order}
                   </div>
                   <div className="col-span-1 flex items-center">
-                    {document.imageUrl ? (
-                      <img 
-                        src={document.imageUrl} 
-                        alt={document.title} 
-                        className="h-10 w-10 object-cover rounded"
-                      />
-                    ) : document.project?.imageUrl ? (
-                      <img 
-                        src={document.project.imageUrl} 
-                        alt={document.project.title} 
-                        className="h-10 w-10 object-cover rounded opacity-50"
-                        title="使用專案圖片"
-                      />
-                    ) : (
-                      <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center">
-                        {getFileTypeIcon(document.fileType)}
-                      </div>
-                    )}
+                    {(() => {
+                      const imageUrl = document.imageUrl || (document.project?.images?.[0]?.imageUrl);
+                      if (imageUrl) {
+                        return (
+                          <img
+                            src={imageUrl}
+                            alt={document.title}
+                            className="h-10 w-10 object-cover rounded"
+                            title={document.imageUrl ? "文檔封面" : `專案圖片: ${document.project?.title}`}
+                          />
+                        );
+                      }
+                      return (
+                        <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center">
+                          {getFileTypeIcon(document.fileType)}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="col-span-2 flex items-center">
                     <div className="flex items-center">

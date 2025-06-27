@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category') || undefined;
     
-    const where: any = {};
+    const where: { category?: string } = {};
     
     if (category) {
       where.category = category;
@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
         order: 'asc'
       },
       include: {
-        documents: true
+        documents: true,
+        images: true
       }
     });
     
@@ -51,38 +52,50 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, category, imageUrl, details, isActive } = body;
+    const { title, description, category, images, details, isActive } = body;
 
     // 檢查必填字段
-    if (!title || !category || !imageUrl) {
+    if (!title || !category || !images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json(
-        { error: '標題、類別和圖片為必填項' },
+        { error: '標題、類別和至少一張圖片為必填項' },
         { status: 400 }
       );
     }
 
-    // 獲取當前最大的order值
-    const maxOrderProject = await prisma.project.findFirst({
-      where: { category },
-      orderBy: {
-        order: 'desc'
-      },
-      select: { order: true }
-    });
+    const newProject = await prisma.$transaction(async (tx) => {
+      // 獲取當前最大的order值
+      const maxOrderProject = await tx.project.findFirst({
+        where: { category },
+        orderBy: {
+          order: 'desc'
+        },
+        select: { order: true }
+      });
 
-    const newOrder = maxOrderProject ? maxOrderProject.order + 1 : 1;
+      const newOrder = maxOrderProject ? maxOrderProject.order + 1 : 1;
 
-    // 創建新專案
-    const newProject = await prisma.project.create({
-      data: {
-        title,
-        description: description || null,
-        category,
-        imageUrl,
-        details: details || { items: [] },
-        order: newOrder,
-        isActive: isActive ?? true
-      }
+      // 創建新專案
+      const createdProject = await tx.project.create({
+        data: {
+          title,
+          description: description || null,
+          category,
+          details: details || { items: [] },
+          order: newOrder,
+          isActive: isActive ?? true,
+        }
+      });
+
+      // 創建專案圖片
+      await tx.projectImage.createMany({
+        data: images.map((image: { imageUrl: string, order: number }) => ({
+          imageUrl: image.imageUrl,
+          order: image.order,
+          projectId: createdProject.id,
+        })),
+      });
+
+      return createdProject;
     });
 
     return NextResponse.json({ project: newProject }, { status: 201 });

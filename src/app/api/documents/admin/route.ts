@@ -50,8 +50,16 @@ export async function GET(request: NextRequest) {
           project: {
             select: {
               title: true,
-              imageUrl: true
-            }
+              images: {
+                select: {
+                  imageUrl: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+                take: 1,
+              },
+            },
           }
         }
       });
@@ -275,8 +283,16 @@ export async function PATCH(request: NextRequest) {
           project: {
             select: {
               title: true,
-              imageUrl: true
-            }
+              images: {
+                select: {
+                  imageUrl: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+                take: 1,
+              },
+            },
           }
         }
       });

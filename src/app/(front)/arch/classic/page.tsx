@@ -15,7 +15,7 @@ function ProjectCard({ project }: { project: Project }) {
       {/* 項目圖片 - 圖片區塊會有放大效果 */}
       <div className="relative w-full pt-[70%] overflow-hidden">
         <Image
-          src={project.imageUrl}
+          src={project.images && project.images.length > 0 ? project.images[0].imageUrl : '/images/placeholder.jpg'}
           alt={project.title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"

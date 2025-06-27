@@ -40,13 +40,23 @@ model Project {
   title       String
   description String?
   category    String
-  imageUrl    String
   details     Json?
   order       Int
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   documents   Document[]
+  images      ProjectImage[]
+}
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 }
 
 model Document {

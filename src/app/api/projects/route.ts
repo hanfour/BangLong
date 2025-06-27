@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category') || undefined;
     
-    const where: any = {
+    const where: { isActive: boolean, category?: string } = {
       isActive: true
     };
     
@@ -19,6 +19,13 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: {
         order: 'asc'
+      },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     });
     

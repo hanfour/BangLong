@@ -11,7 +11,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
-        documents: true
+        documents: true,
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     });
     
@@ -43,34 +48,89 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const id = params.id;
     const body = await request.json();
-    const { title, description, category, imageUrl, details, order, isActive } = body;
-    
-    // 檢查專案是否存在
-    const existingProject = await prisma.project.findUnique({
-      where: { id }
-    });
-    
-    if (!existingProject) {
-      return NextResponse.json(
-        { error: '專案不存在' },
-        { status: 404 }
-      );
+    const { title, description, category, images, details, order, isActive } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: '缺少專案 ID' }, { status: 400 });
     }
-    
-    // 更新專案
-    const updatedProject = await prisma.project.update({
-      where: { id },
-      data: {
-        title: title ?? existingProject.title,
-        description: description === undefined ? existingProject.description : description,
-        category: category ?? existingProject.category,
-        imageUrl: imageUrl ?? existingProject.imageUrl,
-        details: details === undefined ? existingProject.details : details,
-        order: order ?? existingProject.order,
-        isActive: isActive === undefined ? existingProject.isActive : isActive
+
+    const updatedProject = await prisma.$transaction(async (tx) => {
+      // 1. 更新專案基本資料
+      const projectUpdate = await tx.project.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          category,
+          details,
+          order,
+          isActive,
+        },
+      });
+
+      // 2. 處理圖片更新
+      if (images && Array.isArray(images)) {
+        const existingImages = await tx.projectImage.findMany({
+          where: { projectId: id },
+        });
+
+        const existingImageUrls = existingImages.map(img => img.imageUrl);
+        const newImageUrls = images.map((img: { imageUrl: string }) => img.imageUrl);
+
+        // 找出要刪除的圖片
+        const imagesToDelete = existingImages.filter(
+          img => !newImageUrls.includes(img.imageUrl)
+        );
+
+        // 找出要新增的圖片
+        const imagesToAdd = images.filter(
+          (img: { imageUrl: string }) => !existingImageUrls.includes(img.imageUrl)
+        );
+
+        // 找出要更新的圖片 (順序可能改變)
+        const imagesToUpdate = images.filter(
+          (img: { id?: string, imageUrl: string }) => existingImageUrls.includes(img.imageUrl)
+        );
+
+        // 執行刪除
+        if (imagesToDelete.length > 0) {
+          await tx.projectImage.deleteMany({
+            where: {
+              id: {
+                in: imagesToDelete.map(img => img.id),
+              },
+            },
+          });
+        }
+
+        // 執行新增
+        if (imagesToAdd.length > 0) {
+          await tx.projectImage.createMany({
+            data: imagesToAdd.map((img: { imageUrl: string, order: number }) => ({
+              imageUrl: img.imageUrl,
+              order: img.order,
+              projectId: id,
+            })),
+          });
+        }
+
+        // 執行更新
+        for (const img of imagesToUpdate) {
+          await tx.projectImage.updateMany({
+            where: {
+              projectId: id,
+              imageUrl: img.imageUrl,
+            },
+            data: {
+              order: img.order,
+            },
+          });
+        }
       }
+
+      return projectUpdate;
     });
-    
+
     return NextResponse.json({ project: updatedProject });
   } catch (error) {
     console.error('更新專案失敗:', error);
