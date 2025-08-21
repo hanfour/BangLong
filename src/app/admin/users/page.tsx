@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import {
   Loader2, Users, UserPlus, Edit, Trash2, X, Check, ShieldAlert,
-  User as UserIcon, Mail, Key, Save, AlertCircle, Search
+  User as UserIcon, Mail, Key, Save, AlertCircle, Search, Lock
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
@@ -495,6 +495,26 @@ export default function UsersPage() {
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                       className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
                       placeholder="user@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+                {/* password */}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    密碼
+                  </label>
+                  <div className="mt-1 relative rounded-md">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="password"
+                      id="password"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                      className="py-2 pl-10 block w-full border border-gray-300 rounded focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="用戶密碼"
                       required
                     />
                   </div>
