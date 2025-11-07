@@ -47,6 +47,7 @@ model Project {
   updatedAt   DateTime   @updatedAt
   documents   Document[]
   images      ProjectImage[]
+  handbooks   Handbook[]
 }
 
 model ProjectImage {
@@ -99,4 +100,42 @@ model SiteSettings {
   updatedAt   DateTime @updatedAt
 
   @@unique([type, key])
+}
+
+model Handbook {
+  id            String         @id @default(cuid())
+  title         String
+  coverImageUrl String
+  password      String
+  description   String?
+  order         Int
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  projectId     String?
+  project       Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  files         HandbookFile[]
+
+  @@index([projectId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model HandbookFile {
+  id            String   @id @default(cuid())
+  title         String
+  fileUrl       String
+  fileType      String
+  fileSize      Int?
+  order         Int
+  downloadCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  handbookId    String
+  handbook      Handbook @relation(fields: [handbookId], references: [id], onDelete: Cascade)
+
+  @@index([handbookId])
+  @@index([order])
 }

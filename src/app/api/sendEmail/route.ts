@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     
     // 從設定獲取收件人列表或使用指定的收件人
     // 如果是管理員回覆，使用指定的收件人
-    let to = validationResult.data.to || "hanfourhuang@gmail.com"; // 默認或指定的收件人
+    let to = validationResult.data.to || ""; // 默認或指定的收件人
     
     try {
       // 如果不是管理員回覆，則從設定中獲取收件人和模板

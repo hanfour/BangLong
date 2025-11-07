@@ -15,6 +15,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.vercel-storage.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
     ],
   },
   // 如果需要設置其他選項，可以在這裡添加

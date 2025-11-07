@@ -29,9 +29,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navItems = [
     { name: '首頁儀表板', path: '/admin/dashboard', icon: <Home className="w-5 h-5 mr-3" /> },
     { name: '首頁輪播', path: '/admin/carousel', icon: <Image className="w-5 h-5 mr-3" /> },
-    { 
-      name: '建案管理', 
-      path: '/admin/projects', 
+    {
+      name: '建案管理',
+      path: '/admin/projects',
       icon: <Building className="w-5 h-5 mr-3" />,
       subItems: [
         { name: '新案鑑賞', path: '/admin/projects?category=new' },
@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { name: '未來計畫', path: '/admin/projects?category=future' }
       ]
     },
-    { name: '交屋手冊', path: '/admin/documents', icon: <FileText className="w-5 h-5 mr-3" /> },
+    { name: '交屋手冊', path: '/admin/handbooks', icon: <FileText className="w-5 h-5 mr-3" /> },
     { name: '客戶諮詢', path: '/admin/contacts', icon: <MessageCircle className="w-5 h-5 mr-3" /> },
     { name: '帳號管理', path: '/admin/users', icon: <Users className="w-5 h-5 mr-3" /> },
     { name: '網站設定', path: '/admin/settings', icon: <Settings className="w-5 h-5 mr-3" /> }
@@ -89,19 +89,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 {/* 子選單 */}
                 {item.subItems && (
                   <ul className="ml-8 mt-1 mb-2">
-                    {item.subItems.map((subItem) => (
-                      <li key={subItem.path}>
-                        <Link
-                          href={subItem.path}
-                          className={`flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-amber-50 ${
-                            pathname === subItem.path || pathname + window.location.search === subItem.path ? 'text-amber-800 font-medium' : ''
-                          }`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          {subItem.name}
-                        </Link>
-                      </li>
-                    ))}
+                    {item.subItems.map((subItem) => {
+                      const isActive = pathname === subItem.path || pathname?.startsWith(subItem.path);
+                      return (
+                        <li key={subItem.path}>
+                          <Link
+                            href={subItem.path}
+                            className={`flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-amber-50 ${
+                              isActive ? 'text-amber-800 font-medium' : ''
+                            }`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {subItem.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </li>
