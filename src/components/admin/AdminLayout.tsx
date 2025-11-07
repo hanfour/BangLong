@@ -168,7 +168,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {showChangePassword && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">修改密碼</h3>
               <form
