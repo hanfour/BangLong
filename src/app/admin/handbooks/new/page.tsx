@@ -68,7 +68,7 @@ export default function NewHandbookPage() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
         method: 'POST',
         body: formData,
       });
@@ -162,7 +162,7 @@ export default function NewHandbookPage() {
             const formData = new FormData();
             formData.append('file', fileItem.file);
 
-            const uploadResponse = await fetch('/api/upload', {
+            const uploadResponse = await fetch(`/api/upload?filename=${encodeURIComponent(fileItem.file.name)}`, {
               method: 'POST',
               body: formData,
             });
