@@ -69,7 +69,7 @@ export default function HandbookFilesPage() {
 
     try {
       // 先上傳文件
-      const uploadResponse = await fetch('/api/upload', {
+      const uploadResponse = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
         method: 'POST',
         body: formData,
       });
